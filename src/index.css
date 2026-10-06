@@ -1,0 +1,147 @@
+:root {
+  --ink: #16202b;
+  --sub: #5c6b7a;
+  --faint: #8b98a5;
+  --accent: #1f9d55;
+  --accent-d: #157347;
+  --accent-light: #e7f6ec;
+  --accent-ring: rgba(31, 157, 85, .22);
+  --amber: #b5760f;
+  --danger: #c2485a;
+  --danger-light: rgba(194, 72, 90, .12);
+  --rule: #e2e6ea;
+  --rule-strong: #ccd3da;
+  --bg: #eceff2;
+  --surface: #ffffff;
+  --surface-2: #f8fafb;
+  --surface-3: #f1f4f6;
+  --canvas-dot: rgba(22, 32, 43, .07);
+  --header-grad: linear-gradient(180deg, #ffffff 0%, #f7f9fa 100%);
+  --shadow-sm: 0 1px 2px rgba(16, 24, 32, .06);
+  --shadow-md: 0 6px 18px -4px rgba(16, 24, 32, .14), 0 2px 5px rgba(16, 24, 32, .06);
+  --shadow-lg: 0 18px 42px -10px rgba(16, 24, 32, .28), 0 4px 12px rgba(16, 24, 32, .10);
+  --radius: 9px;
+  --radius-sm: 6px;
+  --missing-bg: #fff3f4;
+  --font-ui: 'Inter', 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+  --font-mono: 'Cascadia Mono', 'SF Mono', Consolas, 'Liberation Mono', monospace;
+  --ease: cubic-bezier(.33, 1, .68, 1);
+  --glass: rgba(255, 255, 255, .62);
+  --glass-strong: rgba(255, 255, 255, .82);
+  --glass-brd: rgba(255, 255, 255, .7);
+  --glass-edge: rgba(22, 32, 43, .10);
+  --glass-hi: rgba(255, 255, 255, .85);
+  --glass-blur: blur(18px) saturate(180%);
+  color-scheme: light;
+}
+
+/* Explicit light block so exported drawings can force light mode even when
+   the UI is in dark mode -- technical drawings should stay printable. */
+[data-theme="light"] {
+  --ink: #16202b;
+  --sub: #5c6b7a;
+  --faint: #8b98a5;
+  --accent: #1f9d55;
+  --accent-d: #157347;
+  --accent-light: #e7f6ec;
+  --accent-ring: rgba(31, 157, 85, .22);
+  --amber: #b5760f;
+  --danger: #c2485a;
+  --danger-light: rgba(194, 72, 90, .12);
+  --rule: #e2e6ea;
+  --rule-strong: #ccd3da;
+  --bg: #eceff2;
+  --surface: #ffffff;
+  --surface-2: #f8fafb;
+  --surface-3: #f1f4f6;
+  --canvas-dot: rgba(22, 32, 43, .07);
+  --header-grad: linear-gradient(180deg, #ffffff 0%, #f7f9fa 100%);
+  --shadow-sm: 0 1px 2px rgba(16, 24, 32, .06);
+  --shadow-md: 0 6px 18px -4px rgba(16, 24, 32, .14), 0 2px 5px rgba(16, 24, 32, .06);
+  --shadow-lg: 0 18px 42px -10px rgba(16, 24, 32, .28), 0 4px 12px rgba(16, 24, 32, .10);
+  --radius: 9px;
+  --radius-sm: 6px;
+  --missing-bg: #fff3f4;
+  --font-ui: 'Inter', 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+  --font-mono: 'Cascadia Mono', 'SF Mono', Consolas, 'Liberation Mono', monospace;
+  --ease: cubic-bezier(.33, 1, .68, 1);
+  --glass: rgba(255, 255, 255, .62);
+  --glass-strong: rgba(255, 255, 255, .82);
+  --glass-brd: rgba(255, 255, 255, .7);
+  --glass-edge: rgba(22, 32, 43, .10);
+  --glass-hi: rgba(255, 255, 255, .85);
+  --glass-blur: blur(18px) saturate(180%);
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --ink: #e6ebf0;
+  --sub: #9aa7b4;
+  --faint: #6f7d8b;
+  --accent: #3dc46a;
+  --accent-d: #2ba656;
+  --accent-light: #14341f;
+  --accent-ring: rgba(61, 196, 106, .25);
+  --amber: #e0a63a;
+  --danger: #e0697c;
+  --danger-light: rgba(224, 105, 124, .15);
+  --rule: #2c343d;
+  --rule-strong: #3b454f;
+  --bg: #111519;
+  --surface: #1a2026;
+  --surface-2: #1f262d;
+  --surface-3: #252d35;
+  --canvas-dot: rgba(255, 255, 255, .08);
+  --header-grad: linear-gradient(180deg, #1c232a 0%, #171d23 100%);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .35);
+  --shadow-md: 0 6px 18px -4px rgba(0, 0, 0, .55), 0 2px 5px rgba(0, 0, 0, .35);
+  --shadow-lg: 0 18px 42px -10px rgba(0, 0, 0, .7), 0 4px 12px rgba(0, 0, 0, .45);
+  --missing-bg: #3a1f22;
+  --glass: rgba(32, 40, 49, .58);
+  --glass-strong: rgba(32, 40, 49, .8);
+  --glass-brd: rgba(255, 255, 255, .10);
+  --glass-edge: rgba(0, 0, 0, .45);
+  --glass-hi: rgba(255, 255, 255, .12);
+  --glass-blur: blur(18px) saturate(160%);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body, #root {
+  margin: 0;
+  height: 100%;
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--ink);
+  transition: background .2s, color .2s;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-variant-numeric: tabular-nums;
+}
+body {
+  overscroll-behavior: none;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Respect a reduced-motion preference everywhere rather than per-rule: this
+   app leans on a lot of small transitions, and they are decoration, not
+   information. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--rule-strong); border-radius: 99px; border: 3px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: var(--faint); background-clip: content-box; }

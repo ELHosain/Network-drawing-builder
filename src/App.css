@@ -1,0 +1,1296 @@
+#app { display: flex; flex-direction: column; height: 100%; background: var(--bg); transition: background .2s; }
+
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 16px; background: var(--header-grad); border-bottom: 1px solid var(--rule);
+  flex-wrap: wrap; gap: 10px; box-shadow: var(--shadow-sm); z-index: 20; position: relative;
+}
+/* thin brand-colored accent line along the bottom edge of the header */
+header::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent 60%); opacity: .7;
+}
+.brand { display: flex; align-items: center; gap: 9px; }
+.brand-mark {
+  width: 30px; height: 30px; border-radius: 9px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-d) 100%);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 3px 10px rgba(47,158,68,.4), inset 0 1px 0 rgba(255,255,255,.25); flex-shrink: 0;
+  transform: perspective(200px) rotateX(4deg);
+}
+header h1 {
+  font-size: 13px; margin: 0; letter-spacing: -.005em; font-weight: 700; color: var(--ink);
+  display: flex; flex-direction: column; line-height: 1.3; white-space: nowrap;
+}
+header h1 small { font-size: 9px; font-weight: 600; color: var(--faint); letter-spacing: .08em; text-transform: uppercase; }
+
+#hint {
+  font-size: 10.5px; color: var(--sub); background: var(--surface-3); border: 1px solid var(--rule);
+  padding: 5px 11px; border-radius: 999px; display: flex; align-items: center; gap: 5px;
+}
+#hint kbd {
+  font-family: var(--font-mono); font-size: 9.5px; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--rule-strong); border-bottom-width: 2px; border-radius: 4px; padding: 1px 5px;
+}
+
+.tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+/* Each cluster of related controls sits on one recessed tray, so the eye
+   lands on a group first and a single button second. */
+.tgroup {
+  display: flex; align-items: center; gap: 2px;
+  background: var(--surface-3); border: 1px solid var(--rule);
+  border-radius: 9px; padding: 2px;
+}
+
+button {
+  font: inherit; font-size: 11.5px; font-weight: 500; padding: 6px 10px; border-radius: var(--radius-sm);
+  border: 1px solid transparent; background: transparent; color: var(--ink); cursor: pointer;
+  transition: background .14s var(--ease), color .14s var(--ease), box-shadow .14s var(--ease), border-color .14s var(--ease);
+  display: inline-flex; align-items: center; gap: 5px; line-height: 1; white-space: nowrap;
+}
+.btn-label { letter-spacing: .01em; }
+button:hover:not(:disabled) { background: var(--surface); box-shadow: var(--shadow-sm); border-color: var(--rule); }
+button:disabled { opacity: .35; cursor: default; }
+button:active:not(:disabled) { box-shadow: none; filter: brightness(.97); }
+
+button.primary {
+  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-d) 100%);
+  border-color: var(--accent-d); color: #fff; font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .18), inset 0 1px 0 rgba(255, 255, 255, .22);
+}
+button.primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, var(--accent-d) 0%, var(--accent-d) 100%);
+  border-color: var(--accent-d); box-shadow: 0 3px 10px var(--accent-ring), inset 0 1px 0 rgba(255, 255, 255, .22);
+}
+/* A secondary emphasis step between "primary" and "plain": PDF matters as
+   much as PNG, but two filled green buttons side by side fight each other. */
+button.primary.outline {
+  background: var(--surface); color: var(--accent-d); border-color: var(--accent);
+  box-shadow: none; font-weight: 600;
+}
+button.primary.outline:hover:not(:disabled) { background: var(--accent-light); box-shadow: var(--shadow-sm); }
+
+button.ghost { color: var(--sub); }
+button.ghost:hover:not(:disabled) { color: var(--ink); }
+button.danger { color: var(--danger); }
+button.danger:hover:not(:disabled) { background: var(--danger-light); border-color: transparent; color: var(--danger); }
+
+button.toggled {
+  background: var(--accent-light); border-color: var(--accent); color: var(--accent-d); font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--accent-ring);
+}
+
+.zoom-readout {
+  font-size: 10.5px; font-weight: 600; width: 40px; text-align: center; color: var(--sub);
+  font-variant-numeric: tabular-nums; user-select: none;
+}
+
+/* Snapshot button: the badge is the whole point of putting it in the chrome
+   -- it tells you at a glance how many captures are waiting in the tray. */
+.snap-btn { position: relative; font-weight: 600; }
+.snap-btn:hover:not(:disabled) { color: var(--accent-d); }
+.snap-badge {
+  min-width: 15px; height: 15px; padding: 0 4px; border-radius: 99px; background: var(--accent);
+  color: #fff; font-size: 9px; font-weight: 700; display: inline-flex; align-items: center;
+  justify-content: center; margin-left: 1px;
+}
+
+.theme-toggle {
+  position: relative; width: 44px; height: 24px; border-radius: 999px; border: 1px solid var(--rule);
+  background: var(--surface-3); cursor: pointer; padding: 0; display: inline-flex; align-items: center;
+  transition: background .2s;
+}
+.theme-toggle .knob {
+  position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%;
+  background: linear-gradient(135deg, #ffd166, #f4a300); box-shadow: 0 1px 3px rgba(0,0,0,.3);
+  display: flex; align-items: center; justify-content: center; font-size: 10px;
+  transition: transform .22s cubic-bezier(.4,1.6,.6,1), background .2s;
+}
+[data-theme="dark"] .theme-toggle .knob { transform: translateX(20px); background: linear-gradient(135deg, #5b6773, #2c333b); }
+
+#main { display: flex; flex: 1; min-height: 0; position: relative; }
+
+#palette {
+  width: 158px; background: var(--surface); border-right: 1px solid var(--rule);
+  overflow-y: auto; padding: 11px 9px; flex-shrink: 0;
+}
+#palette h2 {
+  font-size: 9.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--sub); margin: 10px 3px 7px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+#palette h2:first-child { margin-top: 0; }
+.restore-link {
+  font-size: 8.5px; text-transform: none; letter-spacing: 0; padding: 2px 6px; border-radius: 10px;
+  color: var(--accent-d); background: var(--accent-light);
+}
+.restore-link:hover { filter: brightness(.95); transform: none; }
+
+.pitem {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 8px 4px; border: 1px solid var(--rule); border-radius: 9px; margin-bottom: 7px;
+  cursor: grab; background: var(--surface-2); user-select: none; touch-action: none;
+  transition: box-shadow .16s, border-color .16s, transform .14s;
+}
+.pitem:hover { box-shadow: var(--shadow-md); border-color: var(--accent); transform: translateY(-2px); }
+.pitem:active { cursor: grabbing; transform: translateY(0); }
+.pitem img { width: 42px; height: 34px; object-fit: contain; pointer-events: none; }
+.pitem span { font-size: 9px; text-align: center; color: var(--ink); pointer-events: none; line-height: 1.2; word-break: break-word; }
+.pitem .rm {
+  position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%;
+  font: inherit; font-size: 13px; line-height: 1; text-align: center; color: #fff; background: #c2555f;
+  border: 2px solid var(--surface); cursor: pointer; opacity: .7; transition: opacity .12s, background .12s;
+  box-shadow: 0 2px 5px rgba(0,0,0,.3); z-index: 2; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.pitem:hover .rm { opacity: 1; }
+.pitem .rm:hover { background: #a93f49; opacity: 1; }
+#addCustom { border-style: dashed; cursor: pointer; color: var(--sub); justify-content: center; }
+#addCustom:hover { border-color: var(--accent); color: var(--accent); }
+
+#canvasWrap {
+  flex: 1; overflow: auto; position: relative;
+  background: radial-gradient(circle, var(--canvas-dot) 1px, transparent 1px);
+  background-size: 22px 22px; background-color: var(--bg);
+}
+#canvas { position: relative; width: 2400px; height: 1600px; transform-origin: top left; transition: transform .15s ease-out; }
+svg#wires {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: visible;
+  pointer-events: none; z-index: 0;
+}
+/* The wire layer sits UNDER the cards, and the cards are transparent, so a
+   wire stays visible all the way to its port -- but a wire merely passing a
+   device is masked by that device photo and labels instead of being drawn
+   across them. Now that ports live on the card edges rather than on top of
+   the photo, nothing opaque ever stands between a wire and the port it
+   lands on, so this costs nothing and keeps the text clean. */
+.device-node { z-index: 1; }
+/* No card ever rises above the wire layer -- a selected or dragged card that
+   did would hide the links running across it again. */
+.device-node.dragging { z-index: 2; }
+svg#wires .wirehit, svg#wires .wire { pointer-events: stroke; }
+
+.device-node {
+  position: absolute; min-width: 160px; max-width: 360px; background: transparent; border: 1.5px dashed #9aa1a8;
+  border-radius: 10px; box-shadow: none; touch-action: none;
+  transition: box-shadow .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease);
+  cursor: grab; animation: nodeIn .18s ease-out; transform-origin: top left;
+}
+/* Opacity only. This element now carries the card's own scale() transform,
+   and an animation that also writes transform would stomp it for the first
+   180ms -- a freshly duplicated 150% card would visibly snap from 100%. */
+@keyframes nodeIn { from { opacity: 0; } to { opacity: 1; } }
+.device-node:hover { background: var(--surface); border-color: #6b7480; box-shadow: var(--shadow-md); }
+.device-node.selected {
+  background: var(--surface); border-color: var(--accent); border-style: solid;
+  box-shadow: 0 0 0 3px rgba(47,158,68,.2), var(--shadow-md);
+}
+.device-node.dragging { box-shadow: var(--shadow-lg); }
+.device-node.locked { cursor: default; }
+.device-node.locked .node-header { cursor: default; }
+
+.node-header {
+  display: flex; align-items: center; justify-content: space-between; padding: 5px 6px;
+  border-bottom: 1px solid transparent; cursor: grab; background: transparent;
+  border-radius: 4px 4px 0 0; gap: 2px;
+}
+.device-node:hover .node-header, .device-node.selected .node-header {
+  border-bottom-color: var(--rule); background: linear-gradient(var(--surface-2), var(--surface-3));
+}
+.node-header input.title { flex: 1; min-width: 0; }
+.node-header .icobtn {
+  cursor: pointer; font: inherit; font-size: 13px; width: 20px; height: 20px; border-radius: 5px; line-height: 1;
+  color: var(--sub); flex-shrink: 0; opacity: .45; transition: opacity .12s, background .12s, transform .08s;
+  display: flex; align-items: center; justify-content: center;
+  border: none; background: transparent; padding: 0;
+}
+.device-node:hover .icobtn, .device-node.selected .icobtn { opacity: 1; }
+.node-header .icobtn:hover { background: var(--surface-3); transform: scale(1.1); }
+.node-header .del { color: #c2555f; font-size: 15px; font-weight: 700; }
+.node-header .del:hover { background: rgba(194,85,95,.16); }
+
+.device-node input {
+  font: inherit; font-size: 10.5px; border: none; outline: none; width: 100%; padding: 2px 3px;
+  color: var(--ink); background: transparent; border-radius: 3px;
+}
+.device-node input:focus { background: var(--accent-light); }
+.device-node input.title { font-weight: 700; }
+.device-node input.ip { color: #1d5fa8; font-weight: 700; }
+[data-theme="dark"] .device-node input.ip { color: #6ab0ff; }
+.device-node input.missing { border-bottom: 1px solid #e0535f; background: var(--missing-bg); }
+
+.node-body { display: flex; flex-direction: column; align-items: center; padding: 6px 6px 4px; gap: 4px; }
+
+.imgwrap { position: relative; margin: 2px auto 0; border-radius: 4px; overflow: hidden; background: transparent; }
+.imgwrap.row { width: 124px; height: 92px; }
+.imgwrap.col2 { width: 150px; height: 190px; }
+.imgwrap img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; display: block; }
+.placeholder-img { position: relative; width: 124px; height: 92px; border: 1px dashed #8a929a; border-radius: 4px; margin: 2px auto 0; }
+
+/* Anchored to the card's own bottom-right corner (it used to live inside the
+   photo, which is why it only ever resized the photo). Pushed half outside
+   the frame so it reads as a true corner grip. */
+.resize-handle {
+  position: absolute; right: -8px; bottom: -8px; width: 18px; height: 18px; border-radius: 6px;
+  background: var(--glass-strong); backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge); color: var(--sub); box-shadow: var(--shadow-sm);
+  display: flex; align-items: center; justify-content: center; cursor: nwse-resize; z-index: 4;
+  opacity: 0; transition: opacity .14s var(--ease), background .14s var(--ease), color .14s var(--ease), transform .14s var(--ease);
+}
+.resize-handle:hover { transform: scale(1.14); }
+.device-node:hover .resize-handle, .device-node.selected .resize-handle { opacity: 1; }
+.resize-handle:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+.device-node.locked .resize-handle { display: none; }
+
+.ports-row-flow { display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
+/* No big background panel behind the switch's ports anymore -- they float
+   directly on the photo as small tags, like a real wiring diagram, instead
+   of looking like a UI widget slapped on top of the device. */
+.ports-grid-overlay {
+  position: absolute; left: 6%; top: 50%; transform: translateY(-50%); display: flex; gap: 6px;
+}
+.pcol { display: flex; flex-direction: column; gap: 7px; }
+
+.portbox {
+  width: 23px; height: 19px; border: 1px solid #555; border-radius: 4px;
+  background: var(--surface); color: var(--ink);
+  display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700;
+  cursor: crosshair; transition: transform .1s, background .14s, border-color .14s, color .14s, box-shadow .14s;
+  box-shadow: 0 1px 1px rgba(0,0,0,.08);
+}
+/* Ports sitting on top of a device photo (the switch's grid) are smaller and
+   softer/blended when unwired, so they read as small labels on the photo
+   rather than opaque UI stickers -- while still popping clearly once wired. */
+.ports-grid-overlay .portbox {
+  width: 17px; height: 14px; font-size: 8px; border-radius: 3px;
+  background: rgba(255,255,255,.5); color: #444; border-color: rgba(50,50,50,.5);
+  box-shadow: 0 1px 2px rgba(0,0,0,.25);
+}
+[data-theme="dark"] .ports-grid-overlay .portbox { background: rgba(255,255,255,.1); color: #c3cad1; border-color: rgba(255,255,255,.3); }
+.portbox:hover { background: var(--accent); color: #fff; border-color: var(--accent); transform: scale(1.22); box-shadow: 0 2px 6px rgba(47,158,68,.4); }
+.portbox.active { background: var(--accent); color: #fff; border-color: var(--accent); animation: pulse 1s infinite; }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(47,158,68,.5); } 50% { box-shadow: 0 0 0 6px rgba(47,158,68,0); } }
+/* A wired port needs to read as unmistakably "connected" at a glance --
+   bright, saturated green with a visible glow, not a muted tint. */
+.portbox.wired {
+  background: #34d058; border-color: #1f8a37; color: #06220d; font-weight: 800;
+  box-shadow: 0 0 0 2px rgba(52,208,88,.35), 0 2px 6px rgba(52,208,88,.5), inset 0 1px 0 rgba(255,255,255,.4);
+}
+.portbox.wired.amber-end {
+  background: #f0ad2e; border-color: #8a5a0b; color: #2b1c00;
+  box-shadow: 0 0 0 2px rgba(240,173,46,.35), 0 2px 6px rgba(240,173,46,.5), inset 0 1px 0 rgba(255,255,255,.4);
+}
+.portbox.wire-hovered { transform: scale(1.3); box-shadow: 0 0 0 3px rgba(52,208,88,.5), 0 3px 10px rgba(0,0,0,.35); z-index: 3; position: relative; }
+.portbox.wire-hovered.amber-end { box-shadow: 0 0 0 3px rgba(240,173,46,.5), 0 3px 10px rgba(0,0,0,.35); }
+
+.portctl { display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 9.5px; color: var(--sub); margin-top: 3px; font-weight: 600; opacity: 0; transition: opacity .12s; }
+.device-node:hover .portctl, .device-node.selected .portctl { opacity: 1; }
+.portbtn {
+  width: 19px; height: 19px; border-radius: 50%; border: 1px solid #b8bec4; background: var(--surface);
+  font-size: 12px; font-weight: 700; line-height: 1; cursor: pointer; color: var(--ink);
+  display: flex; align-items: center; justify-content: center; transition: background .1s, transform .08s;
+}
+.portbtn:hover { background: var(--accent); border-color: var(--accent); color: #fff; transform: scale(1.1); }
+.portbtn:active { transform: scale(.95); }
+
+.wire {
+  stroke: var(--accent); stroke-width: 2.6; fill: none; stroke-linejoin: round; stroke-linecap: round;
+  transition: stroke .15s, stroke-width .15s, opacity .15s, filter .15s;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,.12));
+}
+.wire.amber { stroke: var(--amber); stroke-dasharray: 6 3; }
+.wire.sel { stroke: #c2555f !important; stroke-dasharray: 4 3; }
+.wire.dimmed { opacity: .18; }
+.wire.hovered {
+  stroke-width: 5; filter: drop-shadow(0 0 5px rgba(47,158,68,.6)) drop-shadow(0 1px 2px rgba(0,0,0,.2));
+}
+.wire.hovered.amber { filter: drop-shadow(0 0 5px rgba(181,118,15,.6)) drop-shadow(0 1px 2px rgba(0,0,0,.2)); }
+.wirehit { stroke: transparent; stroke-width: 16; fill: none; cursor: pointer; }
+.ghostwire {
+  stroke: var(--accent); stroke-width: 2.2; stroke-dasharray: 5 5; fill: none; pointer-events: none;
+  opacity: .7; stroke-linecap: round; animation: ghostFlow .6s linear infinite;
+}
+@keyframes ghostFlow { to { stroke-dashoffset: -10; } }
+
+footer {
+  padding: 7px 16px; font-size: 10px; color: var(--faint); background: var(--surface);
+  border-top: 1px solid var(--rule); display: flex; justify-content: space-between;
+  flex-wrap: wrap; gap: 6px; align-items: center;
+}
+footer .statusbar { color: var(--sub); font-weight: 500; }
+
+.tblock {
+  position: absolute; left: 20px; top: 1470px; width: 920px; display: flex;
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+.tblock-accent { width: 6px; flex-shrink: 0; background: linear-gradient(180deg, var(--accent) 0%, var(--accent-d) 100%); }
+.tblock-inner { flex: 1; padding: 12px 18px 14px; }
+.tblock-heading {
+  font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em;
+  color: var(--accent-d); margin-bottom: 9px; display: flex; align-items: center; gap: 6px;
+}
+.tblock-heading::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
+.tblock-row { display: flex; gap: 20px; }
+.tb-field { font-size: 10px; min-width: 0; }
+.tb-field label {
+  display: flex; align-items: center; gap: 5px; color: var(--sub); font-size: 8.5px;
+  text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px;
+}
+.tb-field label svg { color: #8a929a; flex-shrink: 0; }
+.tblock input {
+  font: inherit; font-size: 12px; border: none; border-bottom: 1.5px solid var(--rule); outline: none;
+  width: 100%; color: var(--ink); font-weight: 700; padding: 2px 1px 4px; background: transparent;
+  transition: border-color .12s;
+}
+.tblock input:focus { border-bottom-color: var(--accent); }
+.tblock input.missing { border-bottom-color: #e0535f; background: var(--missing-bg); }
+
+.empty-state {
+  position: absolute; left: 60px; top: 60px; width: 420px;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
+  color: var(--sub); pointer-events: none; user-select: none;
+}
+.empty-state-icon { font-size: 30px; opacity: .35; margin-bottom: 6px; }
+.empty-state-title { font-size: 15px; font-weight: 700; color: var(--sub); }
+.empty-state-sub { font-size: 12px; color: var(--sub); opacity: .8; }
+
+#dropOverlay {
+  position: absolute; inset: 0; background: rgba(47,158,68,.08); border: 2px dashed var(--accent);
+  align-items: center; justify-content: center; color: var(--accent-d); font-weight: 700; font-size: 14px;
+  pointer-events: none; z-index: 9;
+}
+
+#toasts { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+.toast {
+  background: var(--ink); color: var(--bg); font-size: 11.5px; font-weight: 500; letter-spacing: .01em;
+  padding: 9px 16px; border-radius: 8px;
+  box-shadow: var(--shadow-lg); opacity: 0; transform: translateY(8px);
+  transition: opacity .2s, transform .2s; max-width: 80vw; text-align: center;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+.statusbar { font-size: 10px; color: var(--sub); display: inline-flex; align-items: center; gap: 4px; }
+.save-status { display: inline-flex; align-items: center; gap: 5px; }
+.save-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; box-shadow: 0 0 4px rgba(47,158,68,.6); }
+
+.search-box {
+  display: flex; align-items: center; gap: 5px; background: var(--surface-3); border: 1px solid var(--rule);
+  border-radius: 7px; padding: 5px 8px; margin-bottom: 9px; color: var(--sub);
+}
+.search-box svg { flex-shrink: 0; }
+.search-box input {
+  border: none; outline: none; background: transparent; font: inherit; font-size: 10.5px; color: var(--ink);
+  width: 100%;
+}
+.no-results { font-size: 10px; color: var(--sub); text-align: center; padding: 10px 4px; opacity: .8; }
+
+.help-popover {
+  position: absolute; top: 46px; right: 14px; width: 280px; background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 10px; box-shadow: var(--shadow-lg); padding: 14px 16px; z-index: 30; color: var(--ink);
+}
+.help-popover h3 { margin: 0 0 8px; font-size: 12px; }
+.help-popover table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.help-popover td { padding: 3px 0; color: var(--sub); }
+.help-popover td.key {
+  font-family: monospace; background: var(--surface-3); border-radius: 4px; padding: 1px 6px; color: var(--ink);
+  white-space: nowrap; width: 1%;
+}
+
+/* ===== Export mode: applied to #canvas only while rendering PNG/PDF ===== */
+/* Editor-only chrome disappears, device boxes become clean dashed frames,
+   ports render solid (not translucent) so they're crisp in the exported
+   image, and input fields are swapped for their frozen text values. */
+/* visibility, NOT display. This single line was the cause of every wire in an
+   export landing a port-width away from its port and outside the card frame.
+   display:none removes the duplicate/delete buttons and the port-count control
+   from layout, so the instant export mode is applied each card narrows and
+   shortens and every port shifts -- while the wire paths, which were measured
+   from the pre-export DOM, keep pointing at where the ports used to be.
+   Hiding them without collapsing their boxes means the geometry the wires were
+   measured against is exactly the geometry that gets rasterised. */
+#canvas.exporting [data-editor-only] { visibility: hidden !important; }
+/* Same reasoning as the card border: hide it by colour so the 1px box the
+   wires were measured against survives into the capture. */
+#canvas.exporting .device-node .node-header {
+  background: transparent !important; border-bottom-color: transparent !important;
+}
+#canvas.exporting .device-node .icobtn { visibility: hidden !important; }
+#canvas.exporting .resize-handle { display: none !important; } /* absolute: no layout impact */
+/* ports solid & readable in the export, over the device photo */
+#canvas.exporting .ports-grid-overlay .portbox {
+  background: #fff !important; color: #222 !important; border-color: #444 !important;
+}
+#canvas.exporting .portbox.wired {
+  background: #2f9e44 !important; color: #fff !important; border-color: #1f7a33 !important;
+}
+
+@media (max-width: 1180px) {
+  /* Below this width the labels are what overflow first, and every button
+     already carries both a glyph and a title tooltip. */
+  .btn-label { display: none; }
+  #hint { display: none; }
+}
+
+@media (max-width: 760px) {
+  .snap-tray { width: 190px; right: 8px; bottom: 8px; }
+  #main { flex-direction: column; }
+  #palette {
+    width: 100%; height: auto; max-height: 128px; border-right: none; border-bottom: 1px solid var(--rule);
+    display: flex; flex-direction: row; flex-wrap: nowrap; overflow-x: auto; align-items: flex-start; gap: 6px;
+  }
+  #palette h2, .search-box { display: none; }
+  #palette > div#customList, #palette > .pitem { flex-shrink: 0; }
+  .pitem { width: 72px; margin-bottom: 0; }
+  #hint { display: none; }
+  header h1 small { display: none; }
+}
+
+/* ===== Quick snapshot roll ============================================ */
+/* Docked to the canvas viewport (not the page) so it floats over the
+   drawing without ever taking layout width away from it. */
+.snap-tray {
+  position: absolute; right: 14px; bottom: 14px; z-index: 12; width: 232px;
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 12px;
+  box-shadow: var(--shadow-lg); overflow: hidden;
+  display: flex; flex-direction: column; max-height: calc(100% - 28px);
+  animation: trayIn .22s var(--ease);
+}
+@keyframes trayIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+.snap-tray-head {
+  display: flex; align-items: center; justify-content: space-between; width: 100%;
+  padding: 9px 11px; border: none; border-radius: 0; background: var(--surface-2);
+  border-bottom: 1px solid var(--rule); font-size: 11px; font-weight: 600; cursor: pointer;
+}
+.snap-tray:not(.open) .snap-tray-head { border-bottom-color: transparent; }
+.snap-tray-head:hover { background: var(--surface-3); box-shadow: none; border-color: transparent; border-bottom: 1px solid var(--rule); }
+.snap-tray-title { display: inline-flex; align-items: center; gap: 7px; letter-spacing: .01em; }
+.snap-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+.snap-count {
+  background: var(--surface-3); border: 1px solid var(--rule); color: var(--sub);
+  font-size: 9.5px; font-weight: 700; border-radius: 99px; padding: 1px 6px;
+}
+.snap-chev { color: var(--faint); font-size: 10px; transition: transform .18s var(--ease); }
+.snap-chev.up { transform: rotate(180deg); }
+
+.snap-list { overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 8px; }
+
+.snap-item {
+  margin: 0; border: 1px solid var(--rule); border-radius: 9px; overflow: hidden;
+  background: var(--surface-2); transition: border-color .14s var(--ease), box-shadow .14s var(--ease);
+}
+.snap-item:hover { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-ring); }
+.snap-item img { display: block; width: 100%; height: 76px; object-fit: cover; object-position: top left; background: #fff; }
+.snap-item figcaption {
+  display: flex; align-items: center; justify-content: space-between; gap: 4px;
+  padding: 5px 6px 5px 8px; border-top: 1px solid var(--rule);
+}
+.snap-meta { display: flex; flex-direction: column; font-size: 9.5px; color: var(--sub); line-height: 1.35; min-width: 0; }
+.snap-meta b { color: var(--ink); font-size: 10px; }
+.snap-meta em { font-style: normal; color: var(--faint); font-size: 8.5px; }
+.snap-actions { display: flex; gap: 1px; flex-shrink: 0; }
+.snap-actions button { padding: 4px 5px; font-size: 11px; border-radius: 5px; }
+.snap-actions button.danger { color: var(--danger); }
+
+.snap-foot {
+  display: flex; justify-content: space-between; gap: 4px;
+  padding: 6px 8px; border-top: 1px solid var(--rule); background: var(--surface-2);
+}
+.snap-foot button { font-size: 10px; padding: 4px 8px; }
+
+/* A single white frame over the drawing is the shutter feedback: it reads as
+   "captured" instantly, where a toast alone arrives after the render and
+   leaves you unsure whether the key registered. */
+#snapFlash {
+  position: absolute; inset: 0; background: #fff; pointer-events: none; z-index: 40;
+  animation: shutter .26s var(--ease) forwards;
+}
+@keyframes shutter { from { opacity: .55; } to { opacity: 0; } }
+
+/* The tray is editor chrome, never part of the drawing. */
+#canvas.exporting .snap-tray, #canvas.exporting #snapFlash { display: none !important; }
+
+/* ======================================================================
+   Liquid-glass surface layer
+   ----------------------------------------------------------------------
+   Every floating surface is the same material: a translucent, blurred pane
+   that picks up the colour of the drawing beneath it, a hairline edge, and a
+   bright 1px inner highlight along the top that reads as the lit edge of a
+   pane of glass. Defining that look once and applying it to each surface
+   keeps the whole app reading as one material rather than as a dozen
+   separately-styled boxes.
+   ====================================================================== */
+
+header,
+#palette,
+.tgroup,
+.help-popover,
+.snap-tray,
+.tblock,
+.toast,
+#hint,
+.search-box,
+.device-node {
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+/* The specular top edge. A ::before rather than a border, so it sits inside
+   the corner radius and never affects layout. */
+header::before,
+.tgroup::before,
+.help-popover::before,
+.snap-tray::before,
+.tblock::before,
+.pitem::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(180deg, var(--glass-hi) 0%, transparent 42%);
+  opacity: .5; z-index: 0;
+}
+header > *, .tgroup > *, .help-popover > *, .snap-tray > *, .tblock > *, .pitem > * {
+  position: relative; z-index: 1;
+}
+
+header { background: var(--glass-strong); border-bottom: 1px solid var(--glass-edge); }
+header::after { opacity: .55; }
+
+#palette { background: var(--glass); border-right: 1px solid var(--glass-edge); }
+
+.tgroup {
+  position: relative;
+  background: var(--glass); border-color: var(--glass-edge);
+  box-shadow: inset 0 1px 0 var(--glass-hi), 0 1px 2px rgba(16, 24, 32, .05);
+}
+
+#hint, .search-box { background: var(--glass); border-color: var(--glass-edge); }
+
+.pitem {
+  position: relative;
+  background: var(--glass); border-color: var(--glass-edge);
+  box-shadow: inset 0 1px 0 var(--glass-hi);
+}
+.pitem:hover { background: var(--glass-strong); box-shadow: inset 0 1px 0 var(--glass-hi), var(--shadow-md); }
+
+.help-popover, .snap-tray, .tblock {
+  position: relative;
+  background: var(--glass-strong); border-color: var(--glass-edge);
+  box-shadow: inset 0 1px 0 var(--glass-hi), var(--shadow-lg);
+}
+.snap-tray-head, .snap-foot { background: transparent; }
+.snap-item { background: var(--glass); border-color: var(--glass-edge); }
+
+.toast {
+  background: var(--glass-strong); color: var(--ink);
+  border: 1px solid var(--glass-edge);
+  box-shadow: inset 0 1px 0 var(--glass-hi), var(--shadow-lg);
+}
+
+#dropOverlay {
+  background: linear-gradient(180deg, var(--accent-ring), transparent 60%), var(--glass);
+  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  border-width: 2px;
+}
+
+/* ---- device cards -------------------------------------------------- */
+/* A card is now always a readable pane instead of a transparent dashed
+   outline that only materialises on hover. That outline is exactly why
+   device names washed out: there was no surface behind the text, so each
+   label sat directly on whatever the backdrop happened to be. */
+.device-node {
+  background: var(--glass);
+  border: 1px solid var(--glass-edge);
+  border-style: solid;
+  box-shadow: inset 0 1px 0 var(--glass-hi), var(--shadow-sm);
+}
+.device-node:hover {
+  background: var(--glass-strong); border-color: var(--rule-strong);
+  box-shadow: inset 0 1px 0 var(--glass-hi), var(--shadow-md);
+}
+.device-node.selected {
+  background: var(--glass-strong); border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring), inset 0 1px 0 var(--glass-hi), var(--shadow-md);
+}
+.device-node.dragging { box-shadow: 0 0 0 3px var(--accent-ring), var(--shadow-lg); }
+.device-node:hover .node-header, .device-node.selected .node-header {
+  background: transparent; border-bottom-color: var(--glass-edge);
+}
+
+/* Labels get an explicit, deliberately high-contrast colour instead of
+   inheriting whatever the surface happens to be. */
+.device-node input.title { color: var(--ink); font-weight: 650; font-size: 11px; letter-spacing: -.005em; }
+.device-node input.model { color: var(--sub); font-weight: 500; }
+.device-node input.ip { color: #1457a0; font-weight: 700; font-family: var(--font-mono); font-size: 10px; }
+[data-theme="dark"] .device-node input.ip { color: #7cc0ff; }
+.device-node input::placeholder { color: var(--faint); opacity: 1; }
+.device-node input:focus { background: var(--accent-light); color: var(--ink); }
+
+/* ---- ports --------------------------------------------------------- */
+.portbox {
+  border-radius: 5px; font-weight: 700;
+  background: var(--glass-strong); border: 1px solid var(--glass-edge); color: var(--sub);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  box-shadow: inset 0 1px 0 var(--glass-hi), 0 1px 2px rgba(16, 24, 32, .12);
+  transition: transform .14s var(--ease), background .16s var(--ease), color .16s var(--ease),
+              border-color .16s var(--ease), box-shadow .16s var(--ease);
+}
+.ports-grid-overlay .portbox { background: var(--glass-strong); color: var(--sub); border-color: var(--glass-edge); }
+[data-theme="dark"] .ports-grid-overlay .portbox { background: var(--glass-strong); color: var(--sub); border-color: var(--glass-brd); }
+
+/* An occupied port is the single most important state on the canvas: it is
+   how you read, at a glance, which of a switch's eight ports are already
+   spoken for. It gets a solid saturated fill and a halo rather than a tint,
+   so it still reads at 17px wide on top of a busy product photo. */
+.portbox.wired {
+  background: linear-gradient(180deg, #3ddc74 0%, #1f9d55 100%);
+  border-color: #157347; color: #fff; font-weight: 800;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, .35);
+  box-shadow: 0 0 0 2px rgba(31, 157, 85, .3), 0 2px 6px rgba(31, 157, 85, .45),
+              inset 0 1px 0 rgba(255, 255, 255, .45);
+}
+.portbox.wired.amber-end {
+  background: linear-gradient(180deg, #f5bd4d 0%, #cf8c12 100%);
+  border-color: #8a5a0b; color: #2b1c00; text-shadow: none;
+  box-shadow: 0 0 0 2px rgba(224, 166, 58, .3), 0 2px 6px rgba(224, 166, 58, .45),
+              inset 0 1px 0 rgba(255, 255, 255, .45);
+}
+.portbox:hover {
+  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-d) 100%);
+  color: #fff; border-color: var(--accent-d); transform: scale(1.2);
+  box-shadow: 0 0 0 3px var(--accent-ring), 0 3px 8px rgba(0, 0, 0, .25);
+}
+.portbox.active {
+  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-d) 100%);
+  color: #fff; border-color: var(--accent-d);
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-ring); }
+  50% { box-shadow: 0 0 0 7px rgba(31, 157, 85, 0); }
+}
+
+/* ---- buttons pick up the same material ----------------------------- */
+button:hover:not(:disabled) { background: var(--glass-strong); border-color: var(--glass-edge); }
+.theme-toggle { background: var(--glass); border-color: var(--glass-edge); }
+
+/* ======================================================================
+   Export / snapshot mode
+   ----------------------------------------------------------------------
+   html2canvas cannot rasterise backdrop-filter: a blurred pane comes out as
+   a flat grey block, or disappears entirely. Every glass surface is
+   therefore flattened to a solid, printable equivalent for the duration of a
+   capture. A technical drawing should look like a drawing rather than like a
+   screenshot of an app, so this is the right trade in both directions.
+   ====================================================================== */
+#canvas.exporting,
+#canvas.exporting * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+#canvas.exporting .device-node::before,
+#canvas.exporting .tblock::before { display: none !important; }
+#canvas.exporting .portbox {
+  background: #fff !important; color: #333 !important; border-color: #666 !important;
+  text-shadow: none !important; box-shadow: none !important;
+}
+#canvas.exporting .portbox.wired {
+  background: #1f9d55 !important; color: #fff !important; border-color: #157347 !important;
+}
+#canvas.exporting .portbox.wired.amber-end {
+  background: #cf8c12 !important; color: #fff !important; border-color: #8a5a0b !important;
+}
+#canvas.exporting .tblock { background: #fff !important; box-shadow: none !important; }
+
+/* Glass needs something behind it to be glass. Where the browser cannot blur,
+   fall back to opaque surfaces so nothing turns into unreadable grey mush. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  header, .snap-tray, .help-popover, .tblock, .toast,
+  #palette, .tgroup, .pitem, .device-node, .portbox,
+  .device-node:hover, .device-node.selected { background: var(--surface); }
+}
+
+/* Blur is composited per frame, so a card that is being dragged -- and a
+   canvas full of cards while one is dragged -- drops the backdrop filter for
+   the duration. The glass look is worth a lot when the drawing is still; it
+   is not worth a dropped frame while you are positioning a device. */
+.device-node.dragging, .device-node.dragging .portbox {
+  backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+  background: var(--surface) !important;
+}
+.device-node.dragging { cursor: grabbing; transition: none; }
+.device-node.dragging .node-header { cursor: grabbing; }
+
+/* ======================================================================
+   Device cards are a FRAME, not a panel
+   ----------------------------------------------------------------------
+   The glass pane behind each card was a mistake on the canvas. The wire SVG
+   is painted underneath the cards, so a filled card hid every segment that
+   ran inside its own bounds -- which is precisely the last stretch of wire,
+   the bit between the card edge and the port it lands on. Every link looked
+   like it stopped dead at a rectangle and you could not tell which port it
+   belonged to.
+   The card is transparent again, so wires stay visible right up to the moment
+   they tuck under the (opaque) port box. The chrome -- header, palette, tray,
+   popovers -- keeps the glass treatment, because nothing has to show through
+   those.
+   ====================================================================== */
+.device-node {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid transparent;
+  box-shadow: none;
+  border-radius: 12px;
+}
+
+/* At rest the frame is barely there -- just enough to group the photo with
+   its labels. It firms up on hover and commits fully when selected. */
+.device-node::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  border: 1px dashed var(--node-frame, rgba(140, 152, 165, .32));
+  transition: border-color .18s var(--ease), background .18s var(--ease);
+}
+.device-node:hover {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+.device-node:hover::after {
+  border-color: var(--rule-strong);
+  background: var(--node-wash, rgba(255, 255, 255, .04));
+}
+.device-node.selected {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+.device-node.selected::after {
+  border: 1.5px solid var(--accent);
+  background: var(--accent-ring);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+.device-node.dragging {
+  background: transparent !important;
+  box-shadow: none;
+}
+.device-node.dragging::after {
+  border: 1.5px solid var(--accent);
+  background: var(--node-wash, rgba(255, 255, 255, .06));
+}
+[data-theme="dark"] .device-node { --node-frame: rgba(170, 184, 198, .28); --node-wash: rgba(255, 255, 255, .05); }
+.device-node .node-header,
+.device-node:hover .node-header,
+.device-node.selected .node-header {
+  background: transparent; border-bottom: none;
+}
+
+/* With no panel behind them, the labels carry their own legibility: full
+   contrast plus a one-pixel shadow in the canvas colour, so they stay crisp
+   whether they sit over the dotted background or over a wire. */
+.device-node input.title,
+.device-node input.model,
+.device-node input.ip {
+  text-shadow: 0 0 3px var(--bg), 0 0 3px var(--bg), 0 0 6px var(--bg);
+}
+.device-node input.title { color: var(--ink); }
+.device-node input.model { color: var(--sub); }
+
+/* ---------------------------------------------------------------------
+   Port boxes stay opaque. That is deliberate: the wire slides underneath
+   and stops at the box, so the port reads as the plug the cable goes into
+   rather than as a label sitting near a line.
+   --------------------------------------------------------------------- */
+.portbox {
+  background: var(--surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-color: var(--rule-strong);
+  color: var(--sub);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .25);
+}
+.ports-grid-overlay .portbox,
+[data-theme="dark"] .ports-grid-overlay .portbox {
+  background: var(--surface);
+  border-color: var(--rule-strong);
+  color: var(--sub);
+}
+
+/* A connected port is the thing you are trying to read off the drawing, so
+   it gets the strongest treatment on the canvas: solid green, a halo, and a
+   subtle outward ring so it still separates from a green wire landing on it. */
+.portbox.wired,
+.ports-grid-overlay .portbox.wired {
+  background: linear-gradient(180deg, #45e07d 0%, #1f9d55 100%);
+  border-color: #0f5c34; color: #04240f; font-weight: 800; text-shadow: none;
+  box-shadow: 0 0 0 1.5px var(--bg), 0 0 0 3.5px rgba(69, 224, 125, .45), 0 2px 5px rgba(0, 0, 0, .35);
+}
+.portbox.wired.amber-end,
+.ports-grid-overlay .portbox.wired.amber-end {
+  background: linear-gradient(180deg, #f7c65c 0%, #cf8c12 100%);
+  border-color: #70490a; color: #2b1c00;
+  box-shadow: 0 0 0 1.5px var(--bg), 0 0 0 3.5px rgba(247, 198, 92, .45), 0 2px 5px rgba(0, 0, 0, .35);
+}
+
+/* An unconnected port on a crowded switch should recede, not compete. */
+.ports-grid-overlay .portbox:not(.wired) { opacity: .82; }
+.ports-grid-overlay .portbox:not(.wired):hover { opacity: 1; }
+
+/* Hover highlight: scale plus a bright ring, strong enough to pick one port
+   out of a column of eight. */
+.portbox.wire-hovered {
+  transform: scale(1.35);
+  box-shadow: 0 0 0 1.5px var(--bg), 0 0 0 4px rgba(69, 224, 125, .6), 0 3px 10px rgba(0, 0, 0, .45);
+  z-index: 5; position: relative;
+}
+.portbox.wire-hovered.amber-end {
+  box-shadow: 0 0 0 1.5px var(--bg), 0 0 0 4px rgba(247, 198, 92, .6), 0 3px 10px rgba(0, 0, 0, .45);
+}
+
+/* The device photo is the only opaque thing left inside a card, so give it a
+   touch of lift instead of letting it float flat on the canvas. */
+.imgwrap img { filter: drop-shadow(0 4px 10px rgba(0, 0, 0, .35)); }
+
+/* ---- export ---- */
+/* Same idea on paper: a light dashed frame, never a filled box, so the wires
+   read continuously into their ports in the PNG and PDF too. */
+/* border-COLOR, not border. Dropping the border outright removes 2px from
+   the card box and nudges every port inside it, which would reintroduce the
+   same misalignment this mode is supposed to avoid. */
+#canvas.exporting .device-node {
+  background: transparent !important; border-color: transparent !important; box-shadow: none !important;
+}
+#canvas.exporting .device-node::after {
+  border: 1px dashed #b4bcc4 !important; background: transparent !important; box-shadow: none !important;
+}
+#canvas.exporting .device-node input,
+#canvas.exporting .export-text-overlay { text-shadow: none !important; }
+#canvas.exporting .imgwrap img { filter: none !important; }
+#canvas.exporting .portbox {
+  background: #fff !important; color: #333 !important; border-color: #777 !important;
+  opacity: 1 !important; box-shadow: 0 0 0 1.5px #fff !important;
+}
+#canvas.exporting .portbox.wired {
+  background: #1f9d55 !important; color: #fff !important; border-color: #0f5c34 !important;
+  box-shadow: 0 0 0 1.5px #fff !important;
+}
+#canvas.exporting .portbox.wired.amber-end {
+  background: #cf8c12 !important; color: #fff !important; border-color: #70490a !important;
+}
+
+/* ======================================================================
+   Port layout
+   ----------------------------------------------------------------------
+   Ports live on the card's edges, never on top of the device photo. Each
+   port's physical position now matches the "side" the router uses, which is
+   what makes a wire approach from a direction that touches nothing else.
+   ====================================================================== */
+
+/* Switch-style devices: a column of ports down each outer edge, photo between
+   them. The old absolute overlay is gone entirely. */
+.ports-grid-overlay { display: none; }
+
+.col2-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+}
+.col2-row .imgwrap { margin: 0; flex: 0 0 auto; }
+
+.pcol {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+/* An odd port count leaves the right column one short; keeping both columns
+   top-aligned to the photo stops the two sides drifting out of step. */
+.col2-row .pcol { justify-content: center; }
+
+/* Ports below the labels on a single-row device. Separated by a hairline so
+   the row reads as the card's connector strip rather than as more text. */
+.ports-row-flow {
+  display: flex; justify-content: center; align-items: center; gap: 5px;
+  margin-top: 6px; padding-top: 6px; flex-wrap: wrap; width: 100%;
+  border-top: 1px dashed var(--node-frame, rgba(140, 152, 165, .28));
+}
+
+/* One consistent port size everywhere now that none of them sit over a photo
+   and have to shrink to fit. Big enough to read and to hit. */
+.portbox {
+  width: 21px; height: 17px; font-size: 9px;
+  flex: 0 0 auto;
+}
+
+.node-body { gap: 3px; padding: 6px 8px 5px; }
+.imgwrap.col2 { width: 118px; height: 150px; }
+
+/* ---- export ---- */
+#canvas.exporting .ports-row-flow { border-top-color: #c4ccd4 !important; }
+
+/* ======================================================================
+   Workspace (profile) switcher
+   ====================================================================== */
+.profile-wrap { position: relative; }
+
+.profile-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 3px 9px 3px 3px; border-radius: 999px;
+  background: var(--glass); border: 1px solid var(--glass-edge);
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: inset 0 1px 0 var(--glass-hi);
+}
+.profile-chip:hover:not(:disabled) { background: var(--glass-strong); border-color: var(--rule-strong); }
+.profile-name { font-size: 11.5px; font-weight: 600; max-width: 96px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profile-caret { color: var(--faint); font-size: 9px; }
+
+.avatar {
+  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 9px; font-weight: 800; letter-spacing: .02em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 1px 2px rgba(0, 0, 0, .25);
+}
+
+.profile-pop {
+  position: absolute; top: 40px; right: 0; width: 268px; z-index: 40;
+  background: var(--glass-strong); border: 1px solid var(--glass-edge); border-radius: 12px;
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: inset 0 1px 0 var(--glass-hi), var(--shadow-lg);
+  padding: 10px; color: var(--ink);
+  animation: trayIn .18s var(--ease);
+}
+.profile-pop-head {
+  display: flex; flex-direction: column; gap: 2px;
+  font-size: 11px; font-weight: 700; padding: 2px 4px 9px;
+}
+.profile-hint { font-size: 9.5px; font-weight: 500; color: var(--faint); line-height: 1.35; }
+
+.profile-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+.profile-list li {
+  display: flex; align-items: center; gap: 2px; border-radius: 8px;
+  border: 1px solid transparent; transition: background .14s var(--ease), border-color .14s var(--ease);
+}
+.profile-list li:hover { background: var(--glass); border-color: var(--glass-edge); }
+.profile-list li.current { background: var(--accent-light); border-color: var(--accent); }
+
+.profile-row {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 9px;
+  padding: 7px 8px; border-radius: 7px; background: transparent; border: none;
+}
+.profile-row:hover:not(:disabled) { background: transparent; box-shadow: none; border-color: transparent; }
+.profile-row-text { display: flex; flex-direction: column; min-width: 0; text-align: left; line-height: 1.3; }
+.profile-row-text b { font-size: 11.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profile-row-text em { font-style: normal; font-size: 9px; color: var(--faint); }
+.profile-tick { margin-left: auto; color: var(--accent-d); font-size: 11px; font-weight: 700; }
+
+.profile-row-actions { display: flex; gap: 1px; padding-right: 5px; opacity: 0; transition: opacity .14s var(--ease); }
+.profile-list li:hover .profile-row-actions { opacity: 1; }
+.profile-row-actions button { padding: 4px 5px; font-size: 11px; border-radius: 5px; color: var(--sub); }
+.profile-row-actions button.danger { color: var(--danger); }
+
+.profile-add {
+  width: 100%; justify-content: center; margin-top: 7px; padding: 7px;
+  border: 1px dashed var(--rule-strong); border-radius: 8px; color: var(--sub); font-size: 11px;
+}
+.profile-add:hover:not(:disabled) { border-color: var(--accent); color: var(--accent-d); border-style: dashed; }
+
+.profile-add-row { display: flex; gap: 5px; margin-top: 7px; }
+.profile-add-row input {
+  flex: 1; min-width: 0; font: inherit; font-size: 11.5px; padding: 6px 9px;
+  border-radius: 7px; border: 1px solid var(--rule-strong); background: var(--surface); color: var(--ink);
+  outline: none;
+}
+.profile-add-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-ring); }
+
+.profile-foot {
+  margin: 10px 4px 2px; font-size: 9px; line-height: 1.45; color: var(--faint);
+  border-top: 1px solid var(--glass-edge); padding-top: 8px;
+}
+.profile-foot b { color: var(--sub); font-weight: 600; }
+
+@media (max-width: 1180px) {
+  .profile-name { display: none; }
+  .profile-chip { padding: 3px; }
+  .profile-caret { display: none; }
+}
+
+/* A failed save has to look wrong, not just read wrong. */
+.save-status.error { color: var(--danger); font-weight: 600; }
+.save-status.error .save-dot { background: var(--danger); box-shadow: 0 0 5px var(--danger); animation: pulse 1.6s infinite; }
+
+/* ======================================================================
+   Drawing check
+   ====================================================================== */
+.check-btn { position: relative; font-weight: 600; }
+.check-btn.has-errors { color: var(--danger); }
+
+.check-badge {
+  min-width: 15px; height: 15px; padding: 0 4px; border-radius: 99px;
+  font-size: 9px; font-weight: 700; display: inline-flex; align-items: center;
+  justify-content: center; margin-left: 1px; color: #fff;
+}
+.check-badge.error { background: var(--danger); }
+.check-badge.warning { background: var(--amber); color: #2b1c00; }
+.check-badge.ok { background: var(--accent); }
+
+/* Docked bottom-left, opposite the snapshot tray, so the two never collide. */
+.check-panel {
+  position: absolute; left: 14px; bottom: 14px; z-index: 13; width: 312px;
+  max-height: calc(100% - 28px); display: flex; flex-direction: column;
+  background: var(--glass-strong); border: 1px solid var(--glass-edge); border-radius: 12px;
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: inset 0 1px 0 var(--glass-hi), var(--shadow-lg);
+  animation: trayIn .2s var(--ease); color: var(--ink);
+}
+
+.check-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 8px 9px 12px; border-bottom: 1px solid var(--glass-edge);
+  font-size: 11.5px; font-weight: 700;
+}
+.check-title { display: inline-flex; align-items: center; gap: 6px; }
+.check-pill {
+  font-size: 9px; font-weight: 700; border-radius: 99px; padding: 1px 6px; color: #fff;
+}
+.check-pill.error { background: var(--danger); }
+.check-pill.warning { background: var(--amber); color: #2b1c00; }
+
+.check-list { overflow-y: auto; padding: 6px; }
+.check-list section { margin-bottom: 4px; }
+.check-list h4 {
+  margin: 6px 6px 4px; font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--faint); display: flex; align-items: center; gap: 6px;
+}
+.check-list h4.error { color: var(--danger); }
+.check-list h4.warning { color: var(--amber); }
+.check-list h4 span {
+  background: var(--surface-3); border-radius: 99px; padding: 0 5px; font-size: 8.5px; color: var(--sub);
+}
+.check-list ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+
+.check-row {
+  width: 100%; display: flex; align-items: flex-start; gap: 8px; text-align: left;
+  padding: 7px 8px; border-radius: 7px; font-size: 10.5px; line-height: 1.4; color: var(--sub);
+  border: 1px solid transparent; background: transparent;
+}
+.check-row:hover:not(:disabled) { background: var(--glass); border-color: var(--glass-edge); color: var(--ink); }
+.check-row:disabled { opacity: 1; cursor: default; }
+.check-msg { min-width: 0; }
+
+.check-dot {
+  flex: 0 0 auto; width: 15px; height: 15px; border-radius: 50%; margin-top: 1px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 800; color: #fff;
+}
+.check-dot.error { background: var(--danger); }
+.check-dot.warning { background: var(--amber); color: #2b1c00; }
+.check-dot.info { background: var(--faint); }
+
+.check-clear {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 22px 16px; text-align: center;
+}
+.check-clear-mark {
+  width: 34px; height: 34px; border-radius: 50%; background: var(--accent-light);
+  color: var(--accent-d); display: flex; align-items: center; justify-content: center;
+  font-size: 17px; font-weight: 800; margin-bottom: 4px;
+  box-shadow: 0 0 0 4px var(--accent-ring);
+}
+.check-clear b { font-size: 12px; }
+.check-clear em { font-style: normal; font-size: 10px; color: var(--faint); }
+
+.check-foot {
+  margin: 0; padding: 8px 12px; font-size: 9px; line-height: 1.45; color: var(--faint);
+  border-top: 1px solid var(--glass-edge);
+}
+
+#canvas.exporting .check-panel { display: none !important; }
+
+@media (max-width: 760px) {
+  .check-panel { width: calc(100% - 16px); left: 8px; bottom: 8px; }
+}
+
+/* ======================================================================
+   Port count stepper — moulded 3D keys
+   ----------------------------------------------------------------------
+   Built from four stacked layers rather than a flat fill: a vertical gradient
+   for the moulding, an inner top highlight for the lit upper edge, an inner
+   bottom shade for the curve rolling away underneath, and an outer drop
+   shadow that puts the key above the card. Pressing swaps the highlight and
+   the shade and drops the key 1px, so it reads as actually travelling rather
+   than just changing colour.
+   ====================================================================== */
+.portctl {
+  gap: 9px; font-size: 9.5px; font-weight: 600;
+}
+.pcount { min-width: 48px; text-align: center; color: var(--sub); }
+
+.portbtn {
+  width: 22px; height: 22px; border-radius: 50%; padding: 0;
+  font-size: 13px; font-weight: 700; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 52%, var(--surface-2) 100%);
+  border: 1px solid var(--rule-strong);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .95),
+    inset 0 -2px 3px rgba(16, 24, 32, .13),
+    0 2px 3px rgba(16, 24, 32, .22),
+    0 4px 8px -2px rgba(16, 24, 32, .18);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .8);
+  transition: transform .1s var(--ease), box-shadow .14s var(--ease), background .14s var(--ease);
+}
+
+[data-theme="dark"] .portbtn {
+  background: linear-gradient(180deg, #39434e 0%, #2a323b 52%, #222932 100%);
+  border-color: #46515d;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .17),
+    inset 0 -2px 3px rgba(0, 0, 0, .5),
+    0 2px 3px rgba(0, 0, 0, .5),
+    0 4px 8px -2px rgba(0, 0, 0, .45);
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, .55);
+}
+
+.portbtn:hover {
+  background: linear-gradient(180deg, #4ac97a 0%, var(--accent) 55%, var(--accent-d) 100%);
+  border-color: var(--accent-d); color: #fff;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, .3);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .5),
+    inset 0 -2px 3px rgba(0, 0, 0, .22),
+    0 3px 5px rgba(16, 24, 32, .26),
+    0 7px 14px -3px var(--accent-ring);
+}
+
+/* Pressed: the key sinks, the top highlight becomes a shadow and the bottom
+   shade becomes the highlight — the lighting inverts because the surface is
+   now below the surrounding plane. */
+.portbtn:active {
+  transform: translateY(1px);
+  background: linear-gradient(180deg, var(--accent-d) 0%, var(--accent) 100%);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, .4),
+    inset 0 -1px 0 rgba(255, 255, 255, .3),
+    0 1px 1px rgba(16, 24, 32, .2);
+}
+
+.portbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* The stepper is editor chrome and never appears in an export, so none of this
+   needs an export-mode counterpart beyond staying hidden. */
+
+/* ======================================================================
+   Title block — export only
+   ----------------------------------------------------------------------
+   No longer a form parked on the canvas. The details are collected in a
+   dialog at save time, and this is what carries them onto the exported
+   sheet. It is absolutely positioned, so revealing it for the duration of a
+   capture moves nothing else and the wire geometry stays valid.
+   ====================================================================== */
+.tblock { display: none; }
+#canvas.exporting .tblock { display: flex !important; }
+
+.tb-value {
+  font-size: 12px; font-weight: 700; color: var(--ink);
+  padding: 2px 1px 4px; border-bottom: 1.5px solid var(--rule);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  min-height: 21px;
+}
+#canvas.exporting .tb-value { border-bottom-color: #c4ccd4 !important; text-shadow: none !important; }
+
+/* ======================================================================
+   Drawing details dialog
+   ====================================================================== */
+.dd-backdrop {
+  position: fixed; inset: 0; z-index: 400;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  background: rgba(10, 14, 18, .45);
+  backdrop-filter: blur(6px) saturate(130%); -webkit-backdrop-filter: blur(6px) saturate(130%);
+  animation: ddFade .18s var(--ease);
+}
+@keyframes ddFade { from { opacity: 0; } to { opacity: 1; } }
+
+.dd-panel {
+  width: min(560px, 100%); max-height: 100%; overflow-y: auto;
+  border-radius: 16px; padding: 22px 24px 18px;
+  color: var(--ink);
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-brd);
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow:
+    inset 0 1px 0 var(--glass-hi),
+    inset 0 -1px 0 var(--glass-edge),
+    var(--shadow-lg);
+  position: relative;
+  animation: ddRise .22s var(--ease);
+}
+@keyframes ddRise { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
+
+/* The specular sweep across the top of the pane. */
+.dd-panel::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(170deg, var(--glass-hi) 0%, transparent 38%);
+  opacity: .55;
+}
+.dd-panel > * { position: relative; z-index: 1; }
+
+.dd-head { margin-bottom: 18px; }
+.dd-head h2 {
+  margin: 0 0 3px; font-size: 16px; font-weight: 700; letter-spacing: -.01em;
+}
+.dd-head p { margin: 0; font-size: 11px; color: var(--faint); line-height: 1.45; }
+
+.dd-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px;
+}
+/* Project and machine are the two that identify the document, so they get the
+   full width and lead the form. */
+.dd-field:nth-child(1), .dd-field:nth-child(2) { grid-column: 1 / -1; }
+
+.dd-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.dd-label {
+  font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em;
+  color: var(--sub); display: inline-flex; align-items: center; gap: 4px;
+}
+.dd-label i { color: var(--danger); font-style: normal; font-size: 11px; line-height: 1; }
+
+.dd-field input {
+  font: inherit; font-size: 13px; font-weight: 600; color: var(--ink);
+  padding: 9px 12px; border-radius: 9px; outline: none;
+  background: var(--glass);
+  border: 1px solid var(--glass-edge);
+  box-shadow: inset 0 1px 2px rgba(16, 24, 32, .07);
+  transition: border-color .14s var(--ease), box-shadow .14s var(--ease), background .14s var(--ease);
+  min-width: 0; width: 100%;
+}
+.dd-field input::placeholder { color: var(--faint); font-weight: 500; }
+.dd-field input:hover { background: var(--glass-strong); }
+.dd-field input:focus {
+  border-color: var(--accent); background: var(--surface);
+  box-shadow: 0 0 0 3px var(--accent-ring), inset 0 1px 2px rgba(16, 24, 32, .05);
+}
+.dd-field.invalid input { border-color: var(--danger); box-shadow: 0 0 0 3px var(--danger-light); }
+.dd-error { font-style: normal; font-size: 9.5px; color: var(--danger); font-weight: 600; }
+
+/* The native date control paints its own icon; make it follow the theme
+   instead of staying black on a dark pane. */
+[data-theme="dark"] .dd-field input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) opacity(.65); }
+
+.dd-foot {
+  display: flex; justify-content: flex-end; gap: 8px;
+  margin-top: 20px; padding-top: 15px;
+  border-top: 1px solid var(--glass-edge);
+}
+.dd-foot button { font-size: 12px; padding: 9px 18px; border-radius: 9px; }
+.dd-foot .ghost { border-color: var(--glass-edge); }
+
+@media (max-width: 560px) {
+  .dd-grid { grid-template-columns: 1fr; }
+  .dd-panel { padding: 18px 16px 14px; }
+}

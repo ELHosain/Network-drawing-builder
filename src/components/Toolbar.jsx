@@ -70,13 +70,10 @@ function Toolbar({
     <header>
       <div className="brand">
         <div className="brand-mark">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <circle cx="5" cy="5" r="2.4" fill="#fff" />
-            <circle cx="19" cy="5" r="2.4" fill="#fff" />
-            <circle cx="12" cy="19" r="2.4" fill="#fff" />
-            <path d="M5 7.4V12a2 2 0 0 0 2 2h3M19 7.4V12a2 2 0 0 1-2 2h-3M12 14v2.6"
-              stroke="#fff" strokeWidth="1.6" strokeLinecap="round" />
-          </svg>
+          {/* Served at 96px for a 30px box so it stays sharp on hi-dpi screens.
+              alt is empty on purpose: the product name sits right beside it, so
+              a screen reader announcing the logo too would just be noise. */}
+          <img src="/logo-96.png" alt="" width="96" height="96" draggable="false" />
         </div>
         <h1>
           Network Drawing Builder

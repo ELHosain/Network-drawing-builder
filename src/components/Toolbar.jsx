@@ -44,8 +44,8 @@ function Keys({ combo }) {
 // read every label to find anything; grouping by what the control acts on
 // (history / layout / view / file / output) means you only scan one small
 // cluster, which is what a drafting tool's chrome is expected to feel like.
-function Group({ children, label }) {
-  return <div className="tgroup" role="group" aria-label={label}>{children}</div>;
+function Group({ children, label, className = "" }) {
+  return <div className={`tgroup ${className}`.trim()} role="group" aria-label={label}>{children}</div>;
 }
 
 function Toolbar({
@@ -87,7 +87,7 @@ function Toolbar({
       </div>
 
       <div className="tools">
-        <Group label="History">
+        <Group label="History" className="when-no-dock">
           <button onClick={onUndo} disabled={!canUndo} title="Undo (Ctrl+Z)"><UndoIcon /><span className="btn-label">Undo</span></button>
           <button onClick={onRedo} disabled={!canRedo} title="Redo (Ctrl+Y)"><RedoIcon /><span className="btn-label">Redo</span></button>
         </Group>

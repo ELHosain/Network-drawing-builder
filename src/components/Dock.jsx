@@ -61,6 +61,13 @@ function DockItem({
           <motion.span
             className="dock-label"
             role="tooltip"
+            // The centring offset has to be a motion value, not CSS. Animating
+            // y makes framer-motion write an inline transform, which REPLACES
+            // any transform from the stylesheet -- so a CSS translateX(-50%)
+            // silently disappeared the moment the label animated, leaving it
+            // hanging half a width to the right of its button. Handing x to
+            // framer-motion lets both compose into one transform.
+            style={{ x: '-50%' }}
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: -6 }}
             exit={{ opacity: 0, y: 4 }}

@@ -1538,8 +1538,10 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
 .dock-item:nth-child(5) .dock-badge { background: var(--danger); }
 
 .dock-label {
+  /* No transform here: the horizontal centring is supplied as a motion value
+     in Dock.jsx, because framer-motion's animated transform would overwrite
+     anything set from the stylesheet. */
   position: absolute; bottom: 100%; left: 50%;
-  transform: translateX(-50%);
   margin-bottom: 4px;
   padding: 4px 9px;
   border-radius: 7px;
@@ -1562,4 +1564,14 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
    already carries every one of these actions. */
 @media (max-width: 1000px) {
   .dock { display: none; }
+}
+
+/* Undo and redo live in the dock now, so the toolbar does not carry them
+   twice. But the dock is hidden below 1000px -- so below that breakpoint the
+   toolbar takes them back, rather than a narrow window losing the buttons
+   altogether and leaving only Ctrl+Z. The breakpoint deliberately matches the
+   dock's own. */
+.tgroup.when-no-dock { display: none; }
+@media (max-width: 1000px) {
+  .tgroup.when-no-dock { display: flex; }
 }

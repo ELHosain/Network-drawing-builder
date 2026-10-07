@@ -1,4 +1,5 @@
 import React, { memo, useRef } from 'react';
+import { useMagnify } from '../useMagnify.js';
 import {
   UndoIcon, RedoIcon, GridIcon, LockIcon, MinusIcon, PlusIcon, FitIcon,
   SaveIcon, LoadIcon, InfoIcon, ShieldIcon, CameraIcon, DownloadIcon,
@@ -61,6 +62,9 @@ function Toolbar({
   profileMenu,
 }) {
   const fileRef = useRef(null);
+  // Horizontal, and gentler than the dock: these are small targets that get
+  // clicked constantly, so the scale stays subtle enough not to distract.
+  const { containerRef, magnifyProps } = useMagnify({ axis: 'x', max: 1.12, distance: 110 });
 
   const handleLoadFile = (e) => {
     const file = e.target.files[0];
@@ -86,40 +90,40 @@ function Toolbar({
         </h1>
       </div>
 
-      <div className="tools">
+      <div className="tools" ref={containerRef} {...magnifyProps}>
         <Group label="History" className="when-no-dock">
-          <button onClick={onUndo} disabled={!canUndo} title="Undo (Ctrl+Z)"><UndoIcon /><span className="btn-label">Undo</span></button>
-          <button onClick={onRedo} disabled={!canRedo} title="Redo (Ctrl+Y)"><RedoIcon /><span className="btn-label">Redo</span></button>
+          <button data-magnify onClick={onUndo} disabled={!canUndo} title="Undo (Ctrl+Z)"><UndoIcon /><span className="btn-label">Undo</span></button>
+          <button data-magnify onClick={onRedo} disabled={!canRedo} title="Redo (Ctrl+Y)"><RedoIcon /><span className="btn-label">Redo</span></button>
         </Group>
 
         <Group label="Layout">
-          <button className={snapOn ? 'toggled' : ''} onClick={onToggleSnap} title="Snap devices to the grid">
+          <button data-magnify className={snapOn ? 'toggled' : ''} onClick={onToggleSnap} title="Snap devices to the grid">
             <GridIcon /><span className="btn-label">Snap</span>
           </button>
-          <button className={locked ? 'toggled' : ''} onClick={onToggleLock} title="Lock the layout so devices can't be dragged by accident">
+          <button data-magnify className={locked ? 'toggled' : ''} onClick={onToggleLock} title="Lock the layout so devices can't be dragged by accident">
             <LockIcon open={!locked} /><span className="btn-label">Lock</span>
           </button>
         </Group>
 
         <Group label="View">
-          <button onClick={onZoomOut} title="Zoom out"><MinusIcon /></button>
+          <button data-magnify onClick={onZoomOut} title="Zoom out"><MinusIcon /></button>
           <span className="zoom-readout">{Math.round(zoom * 100)}%</span>
-          <button onClick={onZoomIn} title="Zoom in"><PlusIcon /></button>
-          <button onClick={onFit} title="Fit everything on screen"><FitIcon /><span className="btn-label">Fit</span></button>
+          <button data-magnify onClick={onZoomIn} title="Zoom in"><PlusIcon /></button>
+          <button data-magnify onClick={onFit} title="Fit everything on screen"><FitIcon /><span className="btn-label">Fit</span></button>
         </Group>
 
         <Group label="Project file">
-          <button onClick={onSave} title="Download a backup file"><SaveIcon /><span className="btn-label">Save</span></button>
-          <button onClick={() => fileRef.current?.click()} title="Restore from a backup file"><LoadIcon /><span className="btn-label">Load</span></button>
+          <button data-magnify onClick={onSave} title="Download a backup file"><SaveIcon /><span className="btn-label">Save</span></button>
+          <button data-magnify onClick={() => fileRef.current?.click()} title="Restore from a backup file"><LoadIcon /><span className="btn-label">Load</span></button>
           <input ref={fileRef} type="file" accept="application/json" style={{ display: 'none' }} onChange={handleLoadFile} />
-          <button className="ghost" onClick={onEditDetails} title="Project, machine, title, date and revision for this drawing">
+          <button data-magnify className="ghost" onClick={onEditDetails} title="Project, machine, title, date and revision for this drawing">
             <InfoIcon /><span className="btn-label">Details</span>
           </button>
-          <button className="ghost danger" onClick={onClear} title="Remove everything from the canvas">Clear</button>
+          <button data-magnify className="ghost danger" onClick={onClear} title="Remove everything from the canvas">Clear</button>
         </Group>
 
         <Group label="Check">
-          <button
+          <button data-magnify
             className={`check-btn${checkOpen ? ' toggled' : ''}${errorCount ? ' has-errors' : ''}`}
             onClick={onToggleCheck}
             title="Check the drawing for duplicate addresses, unconnected devices and naming problems"
@@ -132,16 +136,17 @@ function Toolbar({
         </Group>
 
         <Group label="Output">
-          <button className="snap-btn" onClick={onSnapshot} title="Capture a quick snapshot of the layout (F2)">
+          <button data-magnify className="snap-btn" onClick={onSnapshot} title="Capture a quick snapshot of the layout (F2)">
             <CameraIcon /><span className="btn-label">Capture</span>
             {snapshotCount > 0 && <span className="snap-badge">{snapshotCount}</span>}
           </button>
-          <button className="primary" onClick={onExportPNG} title="Export a full-resolution PNG"><DownloadIcon /><span className="btn-label">PNG</span></button>
-          <button className="primary outline" onClick={onExportPDF} title="Export a PDF"><DownloadIcon /><span className="btn-label">PDF</span></button>
-          <button className="ghost" onClick={onCopyImage} title="Copy the drawing as an image to paste elsewhere"><CopyIcon /></button>
+          <button data-magnify className="primary" onClick={onExportPNG} title="Export a full-resolution PNG"><DownloadIcon /><span className="btn-label">PNG</span></button>
+          <button data-magnify className="primary outline" onClick={onExportPDF} title="Export a PDF"><DownloadIcon /><span className="btn-label">PDF</span></button>
+          <button data-magnify className="ghost" onClick={onCopyImage} title="Copy the drawing as an image to paste elsewhere"><CopyIcon /></button>
         </Group>
 
-        <button
+        <button data-magnify
+          data-magnify
           className="theme-toggle"
           onClick={onToggleTheme}
           title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -153,7 +158,7 @@ function Toolbar({
         {profileMenu}
 
         <div style={{ position: 'relative' }}>
-          <button className="ghost icon-only" onClick={onToggleHelp} title="Keyboard shortcuts" aria-expanded={helpOpen}><HelpIcon /></button>
+          <button data-magnify className="ghost icon-only" onClick={onToggleHelp} title="Keyboard shortcuts" aria-expanded={helpOpen}><HelpIcon /></button>
           {helpOpen && (
             <div className="help-popover">
               <h3>Shortcuts</h3>

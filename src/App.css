@@ -138,8 +138,12 @@ button.toggled {
   cursor: grab; background: var(--surface-2); user-select: none; touch-action: none;
   transition: box-shadow .16s, border-color .16s, transform .14s;
 }
-.pitem:hover { box-shadow: var(--shadow-md); border-color: var(--accent); transform: translateY(-2px); }
-.pitem:active { cursor: grabbing; transform: translateY(0); }
+/* No transform in the hover state: the magnifier writes transform inline, which
+   always beats a stylesheet rule, so a translateY here would apply only while
+   the pointer is outside the palette and vanish the moment it enters. The scale
+   is the hover feedback now. */
+.pitem:hover { box-shadow: var(--shadow-md); border-color: var(--accent); }
+.pitem:active { cursor: grabbing; }
 .pitem img { width: 42px; height: 34px; object-fit: contain; pointer-events: none; }
 .pitem span { font-size: 9px; text-align: center; color: var(--ink); pointer-events: none; line-height: 1.2; word-break: break-word; }
 .pitem .rm {
@@ -1584,4 +1588,30 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
 .tgroup.when-no-dock { display: none; }
 @media (max-width: 1000px) {
   .tgroup.when-no-dock { display: flex; }
+}
+
+/* ======================================================================
+   Pointer magnification (toolbar + device palette)
+   ----------------------------------------------------------------------
+   Driven by useMagnify, which writes a scale() to element.style on an
+   animation frame. The transition is what smooths it -- the hook only sets
+   the target, so this is where the easing lives.
+
+   transform-origin stays at the centre: a centred scale leaves the element's
+   centre point exactly where it was, which is what lets the hook keep using
+   getBoundingClientRect for distance without an element's own magnification
+   feeding back into it.
+   ====================================================================== */
+[data-magnify] {
+  transform-origin: center center;
+  transition: transform .16s var(--ease);
+  will-change: transform;
+}
+
+/* A magnified tile must float over its neighbours rather than be overlapped
+   by the one below it, which paints later in DOM order. */
+#palette [data-magnify]:hover { position: relative; z-index: 2; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-magnify] { transition: none; transform: none !important; }
 }

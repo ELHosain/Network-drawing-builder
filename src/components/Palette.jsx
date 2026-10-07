@@ -1,5 +1,6 @@
 import React, { memo, useRef, useState, useMemo } from 'react';
 import { processDeviceImage } from '../utils/imageTools.js';
+import { useMagnify } from '../useMagnify.js';
 
 function SearchIcon() {
   return (
@@ -15,6 +16,9 @@ function Palette({
   onAddCustomDevice, onRemoveCustomDevice, onHideBuiltin, onRestoreBuiltins, toast,
 }) {
   const fileInputRef = useRef(null);
+  // Vertical: the palette is a column, so distance is measured on Y. The list
+  // scrolls, so this must not affect layout -- a transform does not.
+  const { containerRef, magnifyProps } = useMagnify({ axis: 'y', max: 1.1, distance: 150 });
   const [query, setQuery] = useState('');
 
   const q = query.trim().toLowerCase();
@@ -44,7 +48,7 @@ function Palette({
   };
 
   return (
-    <div id="palette">
+    <div id="palette" ref={containerRef} {...magnifyProps}>
       <div className="search-box">
         <SearchIcon />
         <input
@@ -61,7 +65,8 @@ function Palette({
         {visibleCustom.map((key) => (
           <div
             key={key}
-            className="pitem"
+            className="pitem" data-magnify
+          data-magnify
             onPointerDown={(e) => { if (!e.target.closest('.rm')) onStartDrag(key, presets[key]?.name, e); }}
           >
             <button
@@ -103,7 +108,8 @@ function Palette({
       {visibleBuiltin.map((key) => (
         <div
           key={key}
-          className="pitem"
+          className="pitem" data-magnify
+          data-magnify
           onPointerDown={(e) => { if (!e.target.closest('.rm')) onStartDrag(key, presets[key]?.name, e); }}
         >
           <button
@@ -121,7 +127,8 @@ function Palette({
       ))}
       {!q && (
         <div
-          className="pitem"
+          className="pitem" data-magnify
+          data-magnify
           onPointerDown={(e) => onStartDrag('generic', 'device', e)}
         >
           <div className="placeholder-img" style={{ width: 42, height: 34 }} />

@@ -40,6 +40,7 @@ function ProfileMenu({ profiles, activeId, onSwitch, onCreate, onRename, onDelet
   return (
     <div className="profile-wrap" ref={wrapRef}>
       <button
+        data-magnify
         className="profile-chip"
         onClick={() => setOpen((o) => !o)}
         title={`Working as ${active?.name} — click to switch`}

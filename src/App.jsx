@@ -753,7 +753,15 @@ export default function App({ profileId, profiles, onSwitchProfile, onCreateProf
         />
       </div>
       <footer>
-        <span>Arrow keys nudge the selected device &#8226; Ctrl+D duplicates it</span>
+        {/* Moved down from the header, which it was forcing onto a second row.
+            It belongs here anyway: it is orientation for a new user, not a
+            control, and the footer is where the other ambient status lives. */}
+        <span id="hint">
+          <kbd>drag</kbd> a device in
+          <em>&#8226;</em> <kbd>click</kbd> a card to move it
+          <em>&#8226;</em> <kbd>port</kbd> &#8594; <kbd>port</kbd> to wire
+          <em>&#8226;</em> <kbd>F2</kbd> to capture
+        </span>
         <span className="statusbar">
           {proj.nodes.length} device{proj.nodes.length !== 1 ? 's' : ''} &#8226; {proj.wires.length} link{proj.wires.length !== 1 ? 's' : ''}
           &#8226; <SaveStatus lastSaved={proj.lastSaved} saveError={proj.saveError} />

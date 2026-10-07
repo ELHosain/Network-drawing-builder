@@ -1385,3 +1385,70 @@ button:hover:not(:disabled) { background: var(--glass-strong); border-color: var
 }
 .sc-target { font-size: 9.5px; color: var(--faint); }
 [data-theme="dark"] .sc-gesture { color: var(--accent); }
+
+/* ======================================================================
+   Header — single row
+   ----------------------------------------------------------------------
+   Brand on the left, every control on the right. The hint strip used to sit
+   between them, which pushed the toolbar onto a second row and left a wide
+   dead gap across the middle; it now lives in the footer.
+   ====================================================================== */
+header {
+  flex-wrap: nowrap;
+  gap: 14px;
+  padding: 7px 14px;
+  min-height: 46px;
+}
+.brand { flex: 0 0 auto; }
+
+/* The toolbar is the part that must survive a narrow window, so it is the
+   only thing allowed to wrap, and it scrolls sideways before it ever pushes
+   the brand off screen. */
+.tools {
+  flex: 1 1 auto;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 2px;
+  scrollbar-width: none;
+}
+.tools::-webkit-scrollbar { display: none; }
+
+.tgroup { flex: 0 0 auto; }
+
+/* Icon and label share a baseline-ish alignment at these sizes. */
+button svg { flex: 0 0 auto; display: block; }
+button.icon-only { padding: 6px 7px; }
+
+/* ---- theme toggle ---------------------------------------------------- */
+/* The knob held an emoji before, which sat off-centre and changed size
+   between platforms. With an inline SVG it needs explicit centring. */
+.theme-toggle { flex: 0 0 auto; }
+.theme-toggle .knob {
+  display: flex; align-items: center; justify-content: center;
+  color: #4a3200;
+}
+[data-theme="dark"] .theme-toggle .knob { color: #cdd6df; }
+
+/* ---- hint, now in the footer ---------------------------------------- */
+footer #hint {
+  background: none;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  font-size: 10px;
+  color: var(--faint);
+}
+footer #hint em { font-style: normal; opacity: .5; margin: 0 2px; }
+footer #hint kbd { font-size: 9px; padding: 2px 5px; }
+
+@media (max-width: 900px) {
+  footer #hint { display: none; }
+}

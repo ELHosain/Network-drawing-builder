@@ -2,11 +2,11 @@
   --ink: #16202b;
   --sub: #5c6b7a;
   --faint: #8b98a5;
-  --accent: #1f9d55;
-  --accent-d: #157347;
-  --accent-light: #e7f6ec;
-  --accent-ring: rgba(31, 157, 85, .22);
-  --amber: #b5760f;
+  --accent: #009999;
+  --accent-d: #007373;
+  --accent-light: #e0f5f5;
+  --accent-ring: rgba(0, 153, 153, .22);
+  --accent-2: #641e8c;
   --danger: #c2485a;
   --danger-light: rgba(194, 72, 90, .12);
   --rule: #e2e6ea;
@@ -26,6 +26,9 @@
   --font-ui: 'Inter', 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
   --font-mono: 'Cascadia Mono', 'SF Mono', Consolas, 'Liberation Mono', monospace;
   --ease: cubic-bezier(.33, 1, .68, 1);
+  /* The Siemens Energy signature: petrol running into violet. Used only where
+     it reads as branding, never behind text. */
+  --brand-gradient: linear-gradient(90deg, #009999 0%, #641e8c 100%);
   --glass: rgba(255, 255, 255, .62);
   --glass-strong: rgba(255, 255, 255, .82);
   --glass-brd: rgba(255, 255, 255, .7);
@@ -41,11 +44,11 @@
   --ink: #16202b;
   --sub: #5c6b7a;
   --faint: #8b98a5;
-  --accent: #1f9d55;
-  --accent-d: #157347;
-  --accent-light: #e7f6ec;
-  --accent-ring: rgba(31, 157, 85, .22);
-  --amber: #b5760f;
+  --accent: #009999;
+  --accent-d: #007373;
+  --accent-light: #e0f5f5;
+  --accent-ring: rgba(0, 153, 153, .22);
+  --accent-2: #641e8c;
   --danger: #c2485a;
   --danger-light: rgba(194, 72, 90, .12);
   --rule: #e2e6ea;
@@ -65,6 +68,9 @@
   --font-ui: 'Inter', 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
   --font-mono: 'Cascadia Mono', 'SF Mono', Consolas, 'Liberation Mono', monospace;
   --ease: cubic-bezier(.33, 1, .68, 1);
+  /* The Siemens Energy signature: petrol running into violet. Used only where
+     it reads as branding, never behind text. */
+  --brand-gradient: linear-gradient(90deg, #009999 0%, #641e8c 100%);
   --glass: rgba(255, 255, 255, .62);
   --glass-strong: rgba(255, 255, 255, .82);
   --glass-brd: rgba(255, 255, 255, .7);
@@ -78,27 +84,27 @@
   --ink: #e6ebf0;
   --sub: #9aa7b4;
   --faint: #6f7d8b;
-  --accent: #3dc46a;
-  --accent-d: #2ba656;
-  --accent-light: #14341f;
-  --accent-ring: rgba(61, 196, 106, .25);
-  --amber: #e0a63a;
+  --accent: #1fc9c9;
+  --accent-d: #00b3b3;
+  --accent-light: #082f30;
+  --accent-ring: rgba(31, 201, 201, .25);
+  --accent-2: #a66bc8;
   --danger: #e0697c;
   --danger-light: rgba(224, 105, 124, .15);
-  --rule: #2c343d;
-  --rule-strong: #3b454f;
-  --bg: #111519;
-  --surface: #1a2026;
-  --surface-2: #1f262d;
-  --surface-3: #252d35;
+  --rule: #24343a;
+  --rule-strong: #32464d;
+  --bg: #0b1416;
+  --surface: #121d20;
+  --surface-2: #162327;
+  --surface-3: #1c2b2f;
   --canvas-dot: rgba(255, 255, 255, .08);
-  --header-grad: linear-gradient(180deg, #1c232a 0%, #171d23 100%);
+  --header-grad: linear-gradient(180deg, #142125 0%, #0f1a1d 100%);
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, .35);
   --shadow-md: 0 6px 18px -4px rgba(0, 0, 0, .55), 0 2px 5px rgba(0, 0, 0, .35);
   --shadow-lg: 0 18px 42px -10px rgba(0, 0, 0, .7), 0 4px 12px rgba(0, 0, 0, .45);
   --missing-bg: #3a1f22;
-  --glass: rgba(32, 40, 49, .58);
-  --glass-strong: rgba(32, 40, 49, .8);
+  --glass: rgba(18, 32, 36, .58);
+  --glass-strong: rgba(18, 32, 36, .8);
   --glass-brd: rgba(255, 255, 255, .10);
   --glass-edge: rgba(0, 0, 0, .45);
   --glass-hi: rgba(255, 255, 255, .12);

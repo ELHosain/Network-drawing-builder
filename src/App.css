@@ -1616,24 +1616,6 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
   [data-magnify] { transition: none; transform: none !important; }
 }
 
-/* ======================================================================
-   Magnification headroom
-   ----------------------------------------------------------------------
-   The palette scrolls, so it clips on BOTH axes -- a tile that filled its
-   width could only grow by the padding before being cut off at the edge
-   (about 1.13x, which is why the effect looked like nothing was happening).
-   The tiles are now narrower than the column and centred, so there is real
-   room to scale into: 146px of inner width against a 116px tile is 1.26x.
-   ====================================================================== */
-#palette { width: 170px; padding: 11px 12px; }
-
-.pitem {
-  width: 116px;
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 8px;
-}
-
 /* z-index only applies to a positioned element, and the hook raises the
    nearest control so it paints over the ones beside it. */
 [data-magnify] { position: relative; }
@@ -1642,3 +1624,72 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
    somewhere to expand into instead of sitting on its neighbour. */
 .tgroup { gap: 4px; }
 .tools { gap: 10px; }
+
+/* ======================================================================
+   Device palette — magnifying tiles
+   ----------------------------------------------------------------------
+   Tiles now carry an explicit width and height driven by a spring, exactly
+   like the dock, so they grow and push the column down instead of scaling
+   over their neighbours. Their contents therefore have to be sized relative
+   to the tile rather than in fixed pixels, or the image would sit in the
+   corner of a magnified card.
+
+   The column is wider than a tile at rest so there is room to grow into:
+   172px of inner width against a 112px tile is 1.46x, and the tile magnifies
+   to 164px. The palette clips on both axes because it scrolls, so that
+   headroom is what the whole effect depends on.
+   ====================================================================== */
+#palette { width: 196px; padding: 11px 12px; }
+
+.pitem {
+  width: 112px;
+  box-sizing: border-box;
+  margin: 0 auto 8px;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  overflow: hidden;
+  /* The spring owns width and height; a transition on them would fight it. */
+  transition: box-shadow .16s var(--ease), border-color .16s var(--ease), background .16s var(--ease);
+}
+
+/* Sized as a share of the tile so the device photo magnifies with its card. */
+.pitem img {
+  width: 46%;
+  height: 46%;
+  min-height: 0;
+  object-fit: contain;
+  pointer-events: none;
+}
+.pitem .tile-blank {
+  width: 42%;
+  height: 40%;
+  margin: 0;
+  flex: 0 0 auto;
+}
+.pitem span {
+  font-size: 9px;
+  line-height: 1.2;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.pitem .add-plus { font-size: 20px; line-height: 1; }
+
+/* The magnified tile has to paint over the ones it is growing past. */
+.pitem:hover { z-index: 3; }
+
+#customList { display: flex; flex-direction: column; }
+
+@media (max-width: 760px) {
+  /* The column becomes a horizontal strip on small screens, where the
+     vertical magnification has no meaning. */
+  #palette { width: 100%; }
+  .pitem { margin: 0 6px 0 0; }
+}

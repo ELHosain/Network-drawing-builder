@@ -1,6 +1,7 @@
-import React, { memo, useRef, useState, useMemo } from 'react';
+import React, { memo, useRef, useState, useMemo, useEffect } from 'react';
+import { useMotionValue } from 'framer-motion';
 import { processDeviceImage } from '../utils/imageTools.js';
-import { useMagnify } from '../useMagnify.js';
+import PaletteTile from './PaletteTile.jsx';
 
 function SearchIcon() {
   return (
@@ -16,9 +17,18 @@ function Palette({
   onAddCustomDevice, onRemoveCustomDevice, onHideBuiltin, onRestoreBuiltins, toast,
 }) {
   const fileInputRef = useRef(null);
-  // Vertical: the palette is a column, so distance is measured on Y. The list
-  // scrolls, so this must not affect layout -- a transform does not.
-  const { containerRef, magnifyProps } = useMagnify({ axis: 'y', max: 1.24, distance: 125 });
+
+  // One pointer position shared by every tile, so a pointer move costs one
+  // motion-value write rather than a React render of the whole column.
+  const mouseY = useMotionValue(Number.POSITIVE_INFINITY);
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const apply = () => setReduced(mq.matches);
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, []);
   const [query, setQuery] = useState('');
 
   const q = query.trim().toLowerCase();
@@ -48,7 +58,11 @@ function Palette({
   };
 
   return (
-    <div id="palette" ref={containerRef} {...magnifyProps}>
+    <div
+      id="palette"
+      onMouseMove={(e) => mouseY.set(e.clientY)}
+      onMouseLeave={() => mouseY.set(Number.POSITIVE_INFINITY)}
+    >
       <div className="search-box">
         <SearchIcon />
         <input
@@ -63,9 +77,10 @@ function Palette({
       {(visibleCustom.length > 0 || !q) && <h2>My devices</h2>}
       <div id="customList">
         {visibleCustom.map((key) => (
-          <div
+          <PaletteTile
             key={key}
-            className="pitem" data-magnify
+            mouseY={mouseY}
+            reduced={reduced}
             onPointerDown={(e) => { if (!e.target.closest('.rm')) onStartDrag(key, presets[key]?.name, e); }}
           >
             <button
@@ -79,14 +94,19 @@ function Palette({
             </button>
             <img src={presets[key].img} alt={presets[key].name} draggable={false} />
             <span>{presets[key].name}</span>
-          </div>
+          </PaletteTile>
         ))}
       </div>
       {!q && (
-        <div className="pitem" data-magnify id="addCustom" onClick={() => fileInputRef.current?.click()}>
-          <div style={{ fontSize: 20, lineHeight: 1 }}>+</div>
+        <PaletteTile
+          className="addCustom"
+          mouseY={mouseY}
+          reduced={reduced}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <div className="add-plus">+</div>
           <span>Add photo</span>
-        </div>
+        </PaletteTile>
       )}
       <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
 
@@ -105,9 +125,10 @@ function Palette({
         </h2>
       )}
       {visibleBuiltin.map((key) => (
-        <div
+        <PaletteTile
           key={key}
-          className="pitem" data-magnify
+          mouseY={mouseY}
+          reduced={reduced}
           onPointerDown={(e) => { if (!e.target.closest('.rm')) onStartDrag(key, presets[key]?.name, e); }}
         >
           <button
@@ -121,16 +142,17 @@ function Palette({
           </button>
           <img src={presets[key].img} alt={presets[key].name} draggable={false} />
           <span>{presets[key].name}</span>
-        </div>
+        </PaletteTile>
       ))}
       {!q && (
-        <div
-          className="pitem" data-magnify
+        <PaletteTile
+          mouseY={mouseY}
+          reduced={reduced}
           onPointerDown={(e) => onStartDrag('generic', 'device', e)}
         >
-          <div className="placeholder-img" style={{ width: 42, height: 34 }} />
+          <div className="placeholder-img tile-blank" />
           <span>blank box</span>
-        </div>
+        </PaletteTile>
       )}
     </div>
   );

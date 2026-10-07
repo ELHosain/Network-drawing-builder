@@ -26,6 +26,8 @@ function ProfileMenu({ profiles, activeId, onSwitch, onCreate, onRename, onDelet
 
   useEffect(() => { if (adding) inputRef.current?.focus(); }, [adding]);
 
+  const cancelAdd = () => { setAdding(false); setDraft(''); };
+
   const submit = () => {
     const name = draft.trim();
     if (!name) { setAdding(false); setDraft(''); return; }
@@ -77,20 +79,24 @@ function ProfileMenu({ profiles, activeId, onSwitch, onCreate, onRename, onDelet
                   >
                     &#9998;
                   </button>
-                  {profiles.length > 1 && (
-                    <button
-                      className="danger"
-                      title="Delete this workspace and everything in it"
-                      onClick={() => {
-                        // eslint-disable-next-line no-alert
-                        if (window.confirm(`Delete "${p.name}" and everything saved in it?\n\nThis cannot be undone. Export the project file first if you need a copy.`)) {
-                          onDelete(p.id);
-                        }
-                      }}
-                    >
-                      &times;
-                    </button>
-                  )}
+                  {/* Always rendered, disabled when it is the only workspace.
+                      Hiding it entirely left no affordance and no explanation
+                      for why deleting was not possible. */}
+                  <button
+                    className="danger"
+                    disabled={profiles.length <= 1}
+                    title={profiles.length <= 1
+                      ? 'You cannot delete your only workspace — add another one first'
+                      : `Delete "${p.name}" and everything in it`}
+                    onClick={() => {
+                      // eslint-disable-next-line no-alert
+                      if (window.confirm(`Delete "${p.name}" and everything saved in it?\n\nThis cannot be undone. Export the project file first if you need a copy.`)) {
+                        onDelete(p.id);
+                      }
+                    }}
+                  >
+                    &times;
+                  </button>
                 </span>
               </li>
             ))}
@@ -106,9 +112,16 @@ function ProfileMenu({ profiles, activeId, onSwitch, onCreate, onRename, onDelet
                 onChange={(e) => setDraft(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') submit();
-                  if (e.key === 'Escape') { setAdding(false); setDraft(''); }
+                  if (e.key === 'Escape') {
+                    // Only back out of the name field. Without stopping it here
+                    // the key also reaches the document listener, which closes
+                    // the whole menu -- so there was no way to cancel just this.
+                    e.stopPropagation();
+                    cancelAdd();
+                  }
                 }}
               />
+              <button className="ghost" onClick={cancelAdd} title="Cancel (Esc)">Cancel</button>
               <button className="primary" onClick={submit}>Add</button>
             </div>
           ) : (

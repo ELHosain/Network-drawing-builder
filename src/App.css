@@ -1002,7 +1002,11 @@ button:hover:not(:disabled) { background: var(--glass-strong); border-color: var
 }
 .profile-add:hover:not(:disabled) { border-color: var(--accent); color: var(--accent-d); border-style: dashed; }
 
-.profile-add-row { display: flex; gap: 5px; margin-top: 7px; }
+.profile-add-row { display: flex; gap: 5px; margin-top: 7px; align-items: stretch; }
+/* Three controls share a 268px panel, so the buttons stay compact and only the
+   name field flexes. */
+.profile-add-row button { padding: 6px 10px; font-size: 11px; flex: 0 0 auto; white-space: nowrap; }
+.profile-add-row .ghost { border: 1px solid var(--glass-edge); color: var(--sub); }
 .profile-add-row input {
   flex: 1; min-width: 0; font: inherit; font-size: 11.5px; padding: 6px 9px;
   border-radius: 7px; border: 1px solid var(--rule-strong); background: var(--surface); color: var(--ink);

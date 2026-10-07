@@ -575,8 +575,13 @@ header::after { opacity: .55; }
 }
 .pitem:hover { background: var(--glass-strong); box-shadow: inset 0 1px 0 var(--glass-hi), var(--shadow-md); }
 
+/* No `position` here on purpose. These three are each positioned absolutely by
+   their own rule above, and absolute already establishes the containing block
+   the ::before highlight needs. Setting `position: relative` here overrode that
+   and dropped them into normal flow -- which put the help popover inside the
+   toolbar as a 280px box (ballooning the header), the snapshot tray into the
+   canvas layout, and the title block at the wrong place in exports. */
 .help-popover, .snap-tray, .tblock {
-  position: relative;
   background: var(--glass-strong); border-color: var(--glass-edge);
   box-shadow: inset 0 1px 0 var(--glass-hi), var(--shadow-lg);
 }

@@ -48,6 +48,13 @@ export function useProject(profileId) {
   const undoStack = useRef([]);
   const redoStack = useRef([]);
   const suspendHistory = useRef(false);
+  // False until the load-on-mount effect has run. The autosave effect must not
+  // fire before then: on mount nodes/wires start empty, and because that effect
+  // is declared first React runs it before the load, so an unguarded autosave
+  // would write the empty board over the saved drawing and the load would then
+  // read back nothing. This flag is what makes a refresh restore the work
+  // instead of erasing it.
+  const loaded = useRef(false);
   const [historyTick, setHistoryTick] = useState(0); // forces undo/redo button re-render
 
   const allPresets = { ...presets, ...customPresets };
@@ -111,8 +118,10 @@ export function useProject(profileId) {
     setHistoryTick((t) => t + 1);
   }, [serialize, applySnapshot, autosave]);
 
-  // autosave on every meaningful change (debounced via microtask)
+  // autosave on every meaningful change -- but never before the initial load
+  // has restored the saved drawing (see the `loaded` ref above).
   useEffect(() => {
+    if (!loaded.current) return;
     autosave();
   }, [nodes, wires, title, autosave]);
 
@@ -138,11 +147,13 @@ export function useProject(profileId) {
           return Number.isFinite(num) ? Math.max(m, num) : m;
         }, 0);
         idSeq = maxN + 1;
+        loaded.current = true;
         return;
       }
     } catch (e) { /* ignore */ }
     // nothing saved yet -- seed with one example device
     setNodes([makeNodeData('switch', 60, 60, BUILTIN_PRESETS.switch)]);
+    loaded.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

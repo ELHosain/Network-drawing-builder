@@ -1401,19 +1401,19 @@ header {
 }
 .brand { flex: 0 0 auto; }
 
-/* The toolbar is the part that must survive a narrow window, so it is the
-   only thing allowed to wrap, and it scrolls sideways before it ever pushes
-   the brand off screen. */
+/* NO overflow here, deliberately. Setting overflow-x: auto with
+   overflow-y: hidden makes both axes non-visible, which turns this into a
+   clipping container -- and the workspace menu and the shortcuts popover are
+   absolutely positioned descendants that hang BELOW it, so both were clipped
+   out of existence and appeared not to open at all.
+   Narrow windows are handled by letting the groups wrap instead, which costs a
+   second row only when there genuinely is not space for one. */
 .tools {
   flex: 1 1 auto;
   justify-content: flex-end;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding-block: 2px;
-  scrollbar-width: none;
+  flex-wrap: wrap;
+  row-gap: 6px;
 }
-.tools::-webkit-scrollbar { display: none; }
 
 .tgroup { flex: 0 0 auto; }
 

@@ -340,20 +340,82 @@ export function useProject(profileId) {
   }, []);
 
   // ---------- project save/load as file ----------
+  // The saved file carries the custom devices the drawing actually uses, so it
+  // is portable. Without this the file held only node/wire data, and a custom
+  // device opened on another machine -- or in another workspace, or after
+  // clearing site data -- resolved to nothing and fell back to the generic
+  // placeholder, losing its photo, port count and layout.
+  //
+  // Deliberately NOT folded into serialize(): that is also what feeds autosave
+  // and the 50-entry undo stack, and embedding base64 photos there would put 50
+  // copies of every image in memory and blow the localStorage budget.
   const exportProjectFile = useCallback(() => {
-    const blob = new Blob([JSON.stringify(serialize(), null, 2)], { type: 'application/json' });
+    const used = {};
+    nodes.forEach((n) => {
+      if (customPresets[n.key]) used[n.key] = customPresets[n.key];
+    });
+    const payload = { version: 2, ...serialize(), presets: used };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'network-drawing-project.json';
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-  }, [serialize]);
+  }, [serialize, nodes, customPresets]);
 
   const importProjectFile = useCallback((jsonText) => {
     const data = JSON.parse(jsonText);
     pushHistory();
-    applySnapshot(data);
-  }, [pushHistory, applySnapshot]);
+
+    // Merge in any custom devices the file brought with it. A device id that
+    // already exists locally but describes a DIFFERENT device gets a fresh id
+    // and the nodes referencing it are remapped, so importing someone else's
+    // drawing can never overwrite a device in your own library.
+    const incoming = data.presets || {};
+    const keyMap = {};
+    const additions = {};
+    Object.keys(incoming).forEach((key) => {
+      const mine = customPresets[key];
+      if (!mine) {
+        additions[key] = incoming[key];
+        keyMap[key] = key;
+      } else if (JSON.stringify(mine) === JSON.stringify(incoming[key])) {
+        keyMap[key] = key; // identical device, reuse it
+      } else {
+        const fresh = 'custom_' + nextId();
+        additions[fresh] = incoming[key];
+        keyMap[key] = fresh;
+      }
+    });
+
+    if (Object.keys(additions).length) {
+      setCustomPresets((c) => {
+        const next = { ...c, ...additions };
+        try {
+          localStorage.setItem(CUSTOM_KEY, JSON.stringify(next));
+        } catch (e) {
+          setSaveError(e && e.name === 'QuotaExceededError' ? 'full' : 'blocked');
+        }
+        return next;
+      });
+    }
+
+    const importedNodes = (data.nodes || []).map((n) => (
+      keyMap[n.key] && keyMap[n.key] !== n.key ? { ...n, key: keyMap[n.key] } : n
+    ));
+
+    // Advance the id counter past anything the file brought in. Without this a
+    // freshly-loaded project whose nodes are n1..n20 would hand the same ids out
+    // again for the next device added, producing duplicate keys and wires that
+    // attach to the wrong card.
+    const maxN = importedNodes.reduce((m, n) => {
+      const num = parseInt(String(n.id).replace(/\D/g, ''), 10);
+      return Number.isFinite(num) ? Math.max(m, num) : m;
+    }, 0);
+    if (maxN >= idSeq) idSeq = maxN + 1;
+
+    applySnapshot({ ...data, nodes: importedNodes });
+  }, [pushHistory, applySnapshot, customPresets, CUSTOM_KEY]);
 
   const clearAll = useCallback(() => {
     pushHistory();

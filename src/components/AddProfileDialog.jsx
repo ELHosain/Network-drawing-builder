@@ -75,8 +75,8 @@ export default function AddProfileDialog({ open, onCancel, onCreate }) {
         <div className="ap-body">
           <div className="ap-avatar-col">
             {avatar
-              ? <span className="gate-avatar lg"><img src={avatar} alt="" /></span>
-              : <span className="gate-avatar lg" style={{ background: PROFILE_COLORS[0] }}>{preview}</span>}
+              ? <span className="gate-avatar"><img src={avatar} alt="" /></span>
+              : <span className="gate-avatar" style={{ '--face': PROFILE_COLORS[0] }}>{preview}</span>}
 
             <div className="ap-avatar-actions">
               <button className="ghost" onClick={() => fileRef.current?.click()} disabled={busy}>

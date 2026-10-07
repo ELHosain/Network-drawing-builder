@@ -1705,95 +1705,200 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
 /* ======================================================================
    Workspace chooser — the app's front door
    ----------------------------------------------------------------------
-   Same material as the editor behind it: glass panes on the dotted canvas
-   ground, Siemens petrol for the selected state. It reads as the product's
-   own entry screen rather than a separate login page.
+   Leans harder on the Siemens Energy pair than the editor does: a petrol and
+   violet aurora behind the dotted ground, the brand gradient through the
+   heading, and petrol glow on the card being chosen. Cards sit on a
+   perspective stage so hovering tilts them rather than just lifting them.
    ====================================================================== */
 .gate {
   position: fixed; inset: 0; z-index: 500;
   display: flex; align-items: center; justify-content: center;
-  padding: 32px 20px;
+  padding: 40px 20px;
   overflow-y: auto;
+  color: var(--ink);
   background:
-    radial-gradient(circle at 50% 0%, var(--accent-ring), transparent 55%),
     radial-gradient(circle, var(--canvas-dot) 1px, transparent 1px) 0 0 / 22px 22px,
     var(--bg);
-  color: var(--ink);
-  animation: gateIn .3s var(--ease);
+  animation: gateIn .35s var(--ease);
+  isolation: isolate;
 }
 @keyframes gateIn { from { opacity: 0; } to { opacity: 1; } }
 
-.gate-inner { width: 100%; max-width: 880px; margin: auto; text-align: center; }
+/* Two slow-drifting brand-coloured blooms. Behind everything, and never
+   touching text contrast because it sits under a heavily blurred layer. */
+.gate-glow {
+  position: absolute; inset: -20%;
+  z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(38% 42% at 22% 18%, rgba(0, 153, 153, .40), transparent 70%),
+    radial-gradient(34% 38% at 80% 72%, rgba(100, 30, 140, .34), transparent 70%),
+    radial-gradient(30% 34% at 62% 12%, rgba(0, 153, 153, .22), transparent 70%);
+  filter: blur(40px);
+  animation: gateDrift 22s ease-in-out infinite alternate;
+}
+@keyframes gateDrift {
+  from { transform: translate3d(-2%, -1%, 0) scale(1); }
+  to   { transform: translate3d(3%, 2%, 0) scale(1.1); }
+}
 
-.gate-head { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-bottom: 30px; }
+.gate-inner {
+  width: 100%; max-width: 920px; margin: auto; text-align: center;
+  perspective: 1200px;
+}
+
+/* ---- masthead ---- */
+.gate-head {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  margin-bottom: 34px;
+  animation: gateRise .5s var(--ease) both;
+}
 .gate-logo {
-  width: 52px; height: 52px; border-radius: 14px; margin-bottom: 10px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, .35), inset 0 0 0 1px var(--glass-edge);
+  width: 58px; height: 58px; border-radius: 16px; margin-bottom: 12px;
+  box-shadow:
+    0 10px 30px -8px rgba(0, 0, 0, .55),
+    0 0 0 1px var(--glass-edge),
+    0 0 40px -10px var(--accent);
+  animation: gateLogo 5s ease-in-out infinite alternate;
 }
-.gate-head h1 { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+@keyframes gateLogo {
+  from { transform: translateY(0) rotate(0deg); }
+  to   { transform: translateY(-5px) rotate(-1.5deg); }
+}
+
+.gate-brand {
+  margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -.015em;
+}
 .gate-sub {
-  margin: 0; font-size: 9.5px; font-weight: 600; color: var(--faint);
-  text-transform: uppercase; letter-spacing: .12em;
+  margin: 0; font-size: 9.5px; font-weight: 700; color: var(--faint);
+  text-transform: uppercase; letter-spacing: .14em;
 }
 
-.gate-title { margin: 0 0 4px; font-size: 22px; font-weight: 700; letter-spacing: -.02em; }
-.gate-note { margin: 0 0 26px; font-size: 11.5px; color: var(--faint); }
+/* The brand gradient runs through the heading itself, sweeping slowly. */
+.gate-title {
+  margin: 0 0 6px; font-size: 27px; font-weight: 800; letter-spacing: -.025em;
+  background: linear-gradient(100deg, var(--accent) 0%, var(--ink) 40%, var(--ink) 60%, #8b4db0 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+  animation: gateRise .5s .06s var(--ease) both, gateSweep 9s ease-in-out infinite alternate;
+}
+@keyframes gateSweep { from { background-position: 0% 0; } to { background-position: 100% 0; } }
 
+.gate-note {
+  margin: 0 0 30px; font-size: 11.5px; color: var(--faint);
+  animation: gateRise .5s .12s var(--ease) both;
+}
+
+@keyframes gateRise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---- cards ---- */
 .gate-grid {
-  list-style: none; margin: 0 0 26px; padding: 0;
+  list-style: none; margin: 0 0 30px; padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(176px, 1fr));
-  gap: 16px;
-  justify-content: center;
+  grid-template-columns: repeat(auto-fit, minmax(188px, 1fr));
+  gap: 18px;
+  transform-style: preserve-3d;
 }
-.gate-grid > li { position: relative; }
+.gate-grid > li {
+  position: relative;
+  /* Staggered entrance, ordered by --i from the component. */
+  animation: gateCardIn .5s var(--ease) both;
+  animation-delay: calc(.16s + var(--i, 0) * .07s);
+}
+@keyframes gateCardIn {
+  from { opacity: 0; transform: translateY(22px) rotateX(-10deg); }
+  to   { opacity: 1; transform: none; }
+}
 
 .gate-card {
   position: relative;
   width: 100%;
   display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 26px 16px 18px;
-  border-radius: 18px;
+  padding: 28px 16px 20px;
+  border-radius: 20px;
+  overflow: hidden;
+  color: var(--ink);
+  cursor: pointer;
   background: var(--glass-strong);
   border: 1px solid var(--glass-edge);
   backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
-  box-shadow: inset 0 1px 0 var(--glass-hi), var(--shadow-md);
-  color: var(--ink);
-  cursor: pointer;
-  transition: transform .2s var(--ease), box-shadow .2s var(--ease),
-              border-color .2s var(--ease), background .2s var(--ease);
+  box-shadow:
+    inset 0 1px 0 var(--glass-hi),
+    0 2px 6px rgba(0, 0, 0, .18),
+    0 16px 34px -14px rgba(0, 0, 0, .45);
+  transform-style: preserve-3d;
+  transition: transform .26s var(--ease), box-shadow .26s var(--ease),
+              border-color .26s var(--ease);
 }
+
+/* A light sweep across the glass on hover — the "3D pane catching the light"
+   cue, kept subtle enough not to wash out the name beneath it. */
+.gate-sheen {
+  position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+  background: linear-gradient(115deg, transparent 32%, var(--glass-hi) 50%, transparent 68%);
+  opacity: 0; transform: translateX(-60%);
+  transition: opacity .3s var(--ease);
+}
+.gate-card:hover:not(:disabled) .gate-sheen {
+  opacity: .55;
+  animation: gateSheen .75s var(--ease);
+}
+@keyframes gateSheen {
+  from { transform: translateX(-60%); }
+  to   { transform: translateX(60%); }
+}
+
 .gate-card:hover:not(:disabled) {
-  transform: translateY(-5px);
+  transform: translateY(-7px) rotateX(5deg) scale(1.02);
   border-color: var(--accent);
-  box-shadow: inset 0 1px 0 var(--glass-hi), 0 0 0 3px var(--accent-ring), var(--shadow-lg);
-  background: var(--glass-strong);
+  box-shadow:
+    inset 0 1px 0 var(--glass-hi),
+    0 0 0 3px var(--accent-ring),
+    0 10px 20px -8px rgba(0, 0, 0, .4),
+    0 30px 60px -20px rgba(0, 153, 153, .55);
 }
-.gate-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.gate-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 .gate-card:disabled { cursor: default; }
 
-/* The card being opened holds still and lights up, so the choice registers
+/* The card being opened settles and floods with petrol, so the choice reads
    before the editor replaces the screen. */
 .gate-card.chosen {
-  transform: translateY(-5px) scale(.98);
+  transform: translateY(-7px) scale(.97);
   border-color: var(--accent);
-  box-shadow: inset 0 1px 0 var(--glass-hi), 0 0 0 4px var(--accent-ring);
+  box-shadow: inset 0 1px 0 var(--glass-hi), 0 0 0 5px var(--accent-ring),
+              0 0 60px -10px var(--accent);
 }
 
 .gate-avatar {
-  width: 68px; height: 68px; border-radius: 50%;
+  width: 72px; height: 72px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden; flex-shrink: 0;
-  color: #fff; font-size: 22px; font-weight: 700; letter-spacing: .02em;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 4px 12px rgba(0, 0, 0, .3);
-  margin-bottom: 10px;
-  transition: transform .2s var(--ease);
+  margin-bottom: 12px;
+  color: #fff; font-size: 23px; font-weight: 800; letter-spacing: .02em;
+  /* Gradient from the profile's own colour, with the brand petrol as the
+     highlight, so a photoless profile still looks deliberate. */
+  background: var(--face, var(--accent));
+  background: linear-gradient(145deg, var(--face, var(--accent)), color-mix(in srgb, var(--face, var(--accent)) 60%, #000));
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, .3),
+    inset 0 -3px 6px rgba(0, 0, 0, .3),
+    0 8px 18px -6px rgba(0, 0, 0, .55);
+  transition: transform .26s var(--ease), box-shadow .26s var(--ease);
 }
 .gate-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.gate-card:hover:not(:disabled) .gate-avatar { transform: scale(1.06); }
+.gate-card:hover:not(:disabled) .gate-avatar {
+  transform: translateY(-3px) scale(1.07);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, .3),
+    0 12px 24px -8px rgba(0, 0, 0, .6),
+    0 0 0 4px var(--accent-ring);
+}
 
 .gate-name {
-  font-size: 13.5px; font-weight: 650; letter-spacing: -.005em;
+  font-size: 14px; font-weight: 700; letter-spacing: -.01em;
   max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
@@ -1801,75 +1906,95 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
   display: flex; align-items: center; gap: 7px;
   font-size: 10.5px; color: var(--sub);
 }
-.gate-stats b { color: var(--accent-d); font-weight: 700; }
-[data-theme="dark"] .gate-stats b { color: var(--accent); }
+.gate-stats b { color: var(--accent); font-weight: 800; }
 .gate-stats i { width: 3px; height: 3px; border-radius: 50%; background: var(--faint); opacity: .6; }
+.gate-stats.empty { color: var(--faint); font-style: italic; }
 
 .gate-meta { font-size: 9.5px; color: var(--faint); }
 
-/* Keyboard shortcut hint, top-left of each card. */
 .gate-key {
-  position: absolute; top: 9px; left: 11px;
+  position: absolute; top: 10px; left: 12px;
   font-family: var(--font-mono); font-size: 9px; font-weight: 700;
-  color: var(--faint); opacity: .7;
+  color: var(--faint); opacity: .55;
+}
+
+/* Badge and actions share the top-right corner and cross-fade, so they can
+   never overlap each other or the text below. */
+.gate-last,
+.gate-actions {
+  position: absolute; top: 9px; right: 10px;
+  transition: opacity .2s var(--ease), transform .2s var(--ease);
 }
 .gate-last {
-  position: absolute; top: 9px; right: 11px;
-  font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
-  color: var(--accent-d); background: var(--accent-light);
-  padding: 2px 7px; border-radius: 99px;
+  font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em;
+  color: #fff; padding: 3px 8px; border-radius: 99px;
+  background: linear-gradient(90deg, var(--accent), #8b4db0);
+  box-shadow: 0 2px 6px -1px rgba(0, 0, 0, .4);
 }
-[data-theme="dark"] .gate-last { color: var(--accent); }
+.gate-grid > li:hover .gate-last { opacity: 0; transform: translateY(-4px); }
 
+.gate-actions { display: flex; gap: 3px; opacity: 0; transform: translateY(-4px); z-index: 2; }
+.gate-grid > li:hover .gate-actions { opacity: 1; transform: none; }
+.gate-actions button {
+  padding: 4px 7px; font-size: 11px; border-radius: 7px;
+  color: var(--sub); background: var(--surface);
+  border: 1px solid var(--glass-edge);
+  box-shadow: 0 2px 6px -1px rgba(0, 0, 0, .35);
+}
+.gate-actions button:hover:not(:disabled) { color: var(--ink); border-color: var(--accent); }
+.gate-actions button.danger { color: var(--danger); }
+.gate-actions button.danger:hover:not(:disabled) { border-color: var(--danger); }
+.gate-actions button:disabled { opacity: .3; }
+
+/* ---- add card ---- */
 .gate-card.add {
   background: transparent;
-  border-style: dashed;
-  border-color: var(--rule-strong);
+  border: 1.5px dashed var(--rule-strong);
   box-shadow: none;
   justify-content: center;
 }
 .gate-card.add:hover:not(:disabled) {
-  border-style: dashed; border-color: var(--accent);
+  border-color: var(--accent);
   background: var(--accent-light);
-  box-shadow: none;
+  box-shadow: 0 0 0 3px var(--accent-ring), 0 24px 48px -22px rgba(0, 153, 153, .5);
 }
 .add-mark {
   background: transparent;
   border: 1.5px dashed var(--rule-strong);
   color: var(--faint);
-  font-size: 26px; font-weight: 400;
+  font-size: 28px; font-weight: 300;
+  box-shadow: none;
+  transition: transform .26s var(--ease), border-color .26s var(--ease), color .26s var(--ease);
+}
+.gate-card.add:hover .add-mark {
+  border-color: var(--accent); color: var(--accent);
+  transform: rotate(90deg) scale(1.08);
   box-shadow: none;
 }
-.gate-card.add:hover .add-mark { border-color: var(--accent); color: var(--accent-d); }
-[data-theme="dark"] .gate-card.add:hover .add-mark { color: var(--accent); }
-
-/* Rename / delete, revealed on hover so the cards stay clean at rest. */
-.gate-actions {
-  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
-  display: flex; gap: 2px;
-  opacity: 0; transition: opacity .18s var(--ease);
-}
-.gate-grid > li:hover .gate-actions { opacity: 1; }
-.gate-actions button {
-  padding: 3px 7px; font-size: 11px; border-radius: 6px; color: var(--faint);
-  background: var(--surface); border: 1px solid var(--glass-edge);
-}
-.gate-actions button:hover:not(:disabled) { color: var(--ink); }
-.gate-actions button.danger { color: var(--danger); }
-.gate-actions button:disabled { opacity: .3; }
 
 .gate-foot {
-  margin: 0; font-size: 10px; line-height: 1.5; color: var(--faint);
-  max-width: 420px; margin-inline: auto;
+  margin: 0 auto; max-width: 440px;
+  font-size: 10px; line-height: 1.55; color: var(--faint);
+  animation: gateRise .5s .3s var(--ease) both;
 }
 .gate-foot b { color: var(--sub); font-weight: 600; }
 
 @media (max-width: 520px) {
-  .gate { padding: 20px 14px; }
-  .gate-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
-  .gate-title { font-size: 19px; }
-  .gate-avatar { width: 56px; height: 56px; font-size: 18px; }
+  .gate { padding: 24px 14px; }
+  .gate-grid { grid-template-columns: repeat(auto-fit, minmax(146px, 1fr)); gap: 12px; }
+  .gate-title { font-size: 21px; }
+  .gate-avatar { width: 58px; height: 58px; font-size: 19px; }
 }
+
+/* The stage tilt, the sheen and the drifting aurora are all decoration. */
+@media (prefers-reduced-motion: reduce) {
+  .gate, .gate-glow, .gate-head, .gate-title, .gate-note, .gate-foot,
+  .gate-grid > li, .gate-logo { animation: none !important; }
+  .gate-card:hover:not(:disabled) { transform: translateY(-4px); }
+  .gate-sheen { display: none; }
+}
+
+
 
 /* ======================================================================
    Add-workspace dialog

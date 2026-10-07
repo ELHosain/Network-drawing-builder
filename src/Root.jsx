@@ -1,9 +1,27 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import App from './App.jsx';
 import ProfileGate from './components/ProfileGate.jsx';
 import {
   loadProfiles, saveProfiles, loadActiveId, saveActiveId, createProfile, purgeProfileData,
+  profileKey,
 } from './profiles.js';
+
+// The chooser runs before any workspace is open, so useTheme -- which reads a
+// per-workspace key -- has not run and nothing has stamped data-theme on the
+// document. Without this the chooser fell back to the OS preference and
+// rendered light while the editor behind it was dark. It borrows the theme of
+// the workspace used last, defaulting to dark, so the two match.
+function useGateTheme(active, lastUsedId) {
+  useEffect(() => {
+    if (active) return;
+    let theme = 'dark';
+    try {
+      const saved = localStorage.getItem(profileKey('netbuilder-theme', lastUsedId));
+      if (saved === 'light' || saved === 'dark') theme = saved;
+    } catch (e) { /* unreadable preference falls back to dark */ }
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [active, lastUsedId]);
+}
 
 // Owns the list of workspaces, which one is open, and whether the chooser is
 // up. Nothing else.
@@ -33,6 +51,8 @@ export default function Root() {
   const [profiles, setProfiles] = useState(boot.list);
   const [lastUsedId, setLastUsedId] = useState(boot.lastUsedId);
   const [activeId, setActiveId] = useState(null); // null = the chooser is up
+
+  useGateTheme(activeId !== null, lastUsedId);
 
   const openProfile = useCallback((id) => {
     setActiveId(id);

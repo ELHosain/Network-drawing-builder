@@ -155,8 +155,11 @@ button.toggled {
 }
 .pitem:hover .rm { opacity: 1; }
 .pitem .rm:hover { background: #a93f49; opacity: 1; }
-#addCustom { border-style: dashed; cursor: pointer; color: var(--sub); justify-content: center; }
-#addCustom:hover { border-color: var(--accent); color: var(--accent); }
+/* Class, not id: the Add-photo tile became a PaletteTile component and carries
+   a className now, so the old id selector had stopped matching and the tile had
+   silently lost its dashed outline. */
+.addCustom { border-style: dashed; cursor: pointer; color: var(--sub); justify-content: center; }
+.addCustom:hover { border-color: var(--accent); color: var(--accent); }
 
 #canvasWrap {
   flex: 1; overflow: auto; position: relative;
@@ -1651,7 +1654,10 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
   align-items: center;
   justify-content: center;
   gap: 4px;
-  overflow: hidden;
+  /* NO overflow:hidden. The remove button is deliberately positioned outside
+     the tile at top:-6px/right:-6px, so clipping the box cut it in half --
+     that was the glitched red sliver on every tile. The label handles its own
+     truncation, which is the only thing that actually needed clipping. */
   /* The spring owns width and height; a transition on them would fight it. */
   transition: box-shadow .16s var(--ease), border-color .16s var(--ease), background .16s var(--ease);
 }

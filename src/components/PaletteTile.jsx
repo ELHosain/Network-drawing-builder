@@ -12,6 +12,11 @@ import { motion, useSpring, useTransform } from 'framer-motion';
 // back into the distance driving it.
 export const TILE = { w: 112, h: 92, magW: 164, magH: 134, distance: 190 };
 export const TILE_SPRING = { mass: 0.1, stiffness: 170, damping: 14 };
+// Reduced motion stiffens the spring so sizes snap rather than glide. It does
+// NOT switch magnification off: doing that left the palette completely inert
+// for anyone with animation effects disabled in Windows, while the dock -- which
+// only swaps the spring -- carried on magnifying. Same rule in both places now.
+export const TILE_SPRING_REDUCED = { mass: 0.1, stiffness: 900, damping: 40 };
 
 export default function PaletteTile({
   mouseY, reduced, className = '', children, onPointerDown, onClick, title,
@@ -25,20 +30,21 @@ export default function PaletteTile({
   });
 
   const range = [-TILE.distance, 0, TILE.distance];
+  const spring = reduced ? TILE_SPRING_REDUCED : TILE_SPRING;
   const width = useSpring(
     useTransform(distanceFromPointer, range, [TILE.w, TILE.magW, TILE.w]),
-    TILE_SPRING,
+    spring,
   );
   const height = useSpring(
     useTransform(distanceFromPointer, range, [TILE.h, TILE.magH, TILE.h]),
-    TILE_SPRING,
+    spring,
   );
 
   return (
     <motion.div
       ref={ref}
       className={`pitem ${className}`.trim()}
-      style={reduced ? { width: TILE.w, height: TILE.h } : { width, height }}
+      style={{ width, height }}
       onPointerDown={onPointerDown}
       onClick={onClick}
       title={title}

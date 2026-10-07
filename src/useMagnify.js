@@ -20,6 +20,21 @@ import { useCallback, useEffect, useRef } from 'react';
 // it was, so an element's own magnification cannot feed back into the distance
 // that drives it. (That feedback is what flattened the dock's effect when it
 // measured from a changing width.)
+// Writes the factor as a CUSTOM PROPERTY, not as a transform.
+//
+// Writing el.style.transform directly wins over every stylesheet rule, so any
+// element that also has a hover transform -- the palette tiles' lift, the
+// chooser cards' tilt -- silently lost it the moment the pointer entered. A
+// variable lets the stylesheet decide how the magnification composes with
+// whatever else that element is already doing:
+//
+//   .thing        { transform: scale(var(--mag, 1)); }
+//   .thing:hover  { transform: translateY(-6px) scale(calc(var(--mag, 1) * 1.02)); }
+function clear(el) {
+  el.style.removeProperty('--mag');
+  el.style.zIndex = '';
+}
+
 export function useMagnify({
   axis = 'x',
   max = 1.14,
@@ -39,7 +54,7 @@ export function useMagnify({
     const p = pointer.current;
 
     items.forEach((el) => {
-      if (p === null) { el.style.transform = ''; el.style.zIndex = ''; return; }
+      if (p === null) { clear(el); return; }
       const r = el.getBoundingClientRect();
       const centre = axis === 'x' ? r.left + r.width / 2 : r.top + r.height / 2;
       const d = Math.abs(p - centre);
@@ -49,13 +64,12 @@ export function useMagnify({
       const strength = (Math.cos(t * Math.PI) + 1) / 2;
       const scale = 1 + (max - 1) * strength;
       if (scale > 1.001) {
-        el.style.transform = `scale(${scale.toFixed(4)})`;
+        el.style.setProperty('--mag', scale.toFixed(4));
         // The nearest item has to paint over its neighbours, or the one after
         // it in DOM order overlaps the part that just grew.
         el.style.zIndex = String(Math.round(scale * 100));
       } else {
-        el.style.transform = '';
-        el.style.zIndex = '';
+        clear(el);
       }
     });
   }, [axis, max, distance, selector]);
@@ -82,7 +96,7 @@ export function useMagnify({
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
     if (!mq.matches) return undefined;
     const root = containerRef.current;
-    root?.querySelectorAll(selector).forEach((el) => { el.style.transform = ''; el.style.zIndex = ''; });
+    root?.querySelectorAll(selector).forEach(clear);
     pointer.current = null;
     return undefined;
   }, [selector]);

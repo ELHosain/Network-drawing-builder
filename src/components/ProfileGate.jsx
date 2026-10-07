@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { initials, profileStats, formatBytes, profileBytes } from '../profiles.js';
+import { useMagnify } from '../useMagnify.js';
 import AddProfileDialog from './AddProfileDialog.jsx';
 
 function Avatar({ profile }) {
@@ -24,6 +25,9 @@ function Avatar({ profile }) {
 export default function ProfileGate({
   profiles, lastUsedId, onSelect, onCreate, onRename, onDelete,
 }) {
+  // Horizontal: the cards sit in a row. Gentler than the dock -- these are
+  // large targets, so a little swell reads as plenty.
+  const { containerRef, magnifyProps } = useMagnify({ axis: 'x', max: 1.09, distance: 300 });
   const [adding, setAdding] = useState(false);
   const [busyId, setBusyId] = useState(null);
 
@@ -68,13 +72,14 @@ export default function ProfileGate({
           Each workspace keeps its own drawings, device library and settings on this computer.
         </p>
 
-        <ul className="gate-grid">
+        <ul className="gate-grid" ref={containerRef} {...magnifyProps}>
           {profiles.map((p, i) => {
             const s = stats[p.id] || { devices: 0, links: 0, custom: 0, bytes: 0 };
             const empty = s.devices === 0 && s.links === 0;
             return (
               <li key={p.id} style={{ '--i': i }}>
                 <button
+                  data-magnify
                   className={`gate-card${busyId === p.id ? ' chosen' : ''}`}
                   onClick={() => choose(p.id)}
                   disabled={busyId !== null}
@@ -138,7 +143,7 @@ export default function ProfileGate({
           })}
 
           <li style={{ '--i': profiles.length }}>
-            <button className="gate-card add" onClick={() => setAdding(true)} disabled={busyId !== null}>
+            <button data-magnify className="gate-card add" onClick={() => setAdding(true)} disabled={busyId !== null}>
               <span className="gate-avatar add-mark">+</span>
               <span className="gate-name">Add workspace</span>
               <span className="gate-meta">A fresh canvas and library</span>

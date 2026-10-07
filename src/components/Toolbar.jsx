@@ -1,17 +1,38 @@
 import React, { memo, useRef } from 'react';
 
-const SHORTCUTS = [
-  ['Ctrl+Z / Ctrl+Y', 'Undo / Redo'],
-  ['Ctrl+D', 'Duplicate selected device'],
-  ['Delete', 'Delete selected wire'],
-  ['Arrow keys', 'Nudge selected device (Shift = bigger step)'],
-  ['Esc', 'Cancel an in-progress wire connection'],
-  ['Ctrl+S', 'Save project file'],
-  ['F2 / Ctrl+Shift+S', 'Take a quick snapshot of the layout'],
-  ['Ctrl+K', 'Open the drawing check'],
-  ['Double-click a wire', 'Toggle green / amber remote-link style'],
-  ['Click a wired port', 'Disconnect that link'],
+// Keys are stored as combos ("Ctrl+Z") and split into individual caps at
+// render time, so every modifier gets its own keycap instead of the whole
+// string sitting in one grey chip.
+const KEY_SHORTCUTS = [
+  { combos: ['Ctrl+Z', 'Ctrl+Y'], desc: 'Undo and redo' },
+  { combos: ['Ctrl+D'], desc: 'Duplicate the selected device' },
+  { combos: ['Del'], desc: 'Delete the selected wire' },
+  { combos: ['←↑↓→'], desc: 'Nudge the selected device — hold Shift for bigger steps' },
+  { combos: ['Esc'], desc: 'Cancel a wire connection in progress' },
+  { combos: ['Ctrl+S'], desc: 'Save the project file' },
+  { combos: ['F2'], desc: 'Take a quick snapshot' },
+  { combos: ['Ctrl+K'], desc: 'Open the drawing check' },
 ];
+
+// Split out because these are gestures, not keys -- rendering "Double-click a
+// wire" inside a keycap was what made the old list look broken.
+const MOUSE_SHORTCUTS = [
+  { action: 'Double-click', target: 'a wire', desc: 'Switch between petrol and violet link styles' },
+  { action: 'Click', target: 'a wired port', desc: 'Disconnect that link' },
+];
+
+function Keys({ combo }) {
+  return (
+    <span className="kcombo">
+      {combo.split('+').map((k, i) => (
+        <React.Fragment key={k}>
+          {i > 0 && <span className="kplus">+</span>}
+          <kbd>{k}</kbd>
+        </React.Fragment>
+      ))}
+    </span>
+  );
+}
 
 function CameraIcon() {
   return (
@@ -156,17 +177,37 @@ function Toolbar({
           <button className="ghost" onClick={onToggleHelp} title="Keyboard shortcuts" aria-expanded={helpOpen}>?</button>
           {helpOpen && (
             <div className="help-popover">
-              <h3>Keyboard shortcuts</h3>
-              <table>
-                <tbody>
-                  {SHORTCUTS.map(([key, desc]) => (
-                    <tr key={key}>
-                      <td className="key">{key}</td>
-                      <td>{desc}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <h3>Shortcuts</h3>
+
+              <h4>Keyboard</h4>
+              <ul className="shortcut-list">
+                {KEY_SHORTCUTS.map((s) => (
+                  <li key={s.combos.join('/')}>
+                    <span className="sc-keys">
+                      {s.combos.map((c, i) => (
+                        <React.Fragment key={c}>
+                          {i > 0 && <span className="sc-or">or</span>}
+                          <Keys combo={c} />
+                        </React.Fragment>
+                      ))}
+                    </span>
+                    <span className="sc-desc">{s.desc}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <h4>Mouse</h4>
+              <ul className="shortcut-list">
+                {MOUSE_SHORTCUTS.map((s) => (
+                  <li key={s.action + s.target}>
+                    <span className="sc-keys">
+                      <span className="sc-gesture">{s.action}</span>
+                      <span className="sc-target">{s.target}</span>
+                    </span>
+                    <span className="sc-desc">{s.desc}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </div>

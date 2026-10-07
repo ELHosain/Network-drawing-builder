@@ -31,10 +31,8 @@ header h1 small { font-size: 9px; font-weight: 600; color: var(--faint); letter-
   font-size: 10.5px; color: var(--sub); background: var(--surface-3); border: 1px solid var(--rule);
   padding: 5px 11px; border-radius: 999px; display: flex; align-items: center; gap: 5px;
 }
-#hint kbd {
-  font-family: var(--font-mono); font-size: 9.5px; background: var(--surface); color: var(--ink);
-  border: 1px solid var(--rule-strong); border-bottom-width: 2px; border-radius: 4px; padding: 1px 5px;
-}
+/* Keycap styling is shared with the shortcuts popover; see the Shortcuts
+   section at the end of this file. */
 
 .tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
@@ -397,13 +395,8 @@ footer .statusbar { color: var(--sub); font-weight: 500; }
   position: absolute; top: 46px; right: 14px; width: 280px; background: var(--surface); border: 1px solid var(--rule);
   border-radius: 10px; box-shadow: var(--shadow-lg); padding: 14px 16px; z-index: 30; color: var(--ink);
 }
-.help-popover h3 { margin: 0 0 8px; font-size: 12px; }
-.help-popover table { width: 100%; border-collapse: collapse; font-size: 11px; }
-.help-popover td { padding: 3px 0; color: var(--sub); }
-.help-popover td.key {
-  font-family: monospace; background: var(--surface-3); border-radius: 4px; padding: 1px 6px; color: var(--ink);
-  white-space: nowrap; width: 1%;
-}
+/* The popover is a list now, not a table -- its rules live in the Shortcuts
+   section at the end of this file. */
 
 /* ===== Export mode: applied to #canvas only while rendering PNG/PDF ===== */
 /* Editor-only chrome disappears, device boxes become clean dashed frames,
@@ -1314,3 +1307,81 @@ button:hover:not(:disabled) { background: var(--glass-strong); border-color: var
   .dd-grid { grid-template-columns: 1fr; }
   .dd-panel { padding: 18px 16px 14px; }
 }
+
+/* ======================================================================
+   Shortcuts popover
+   ----------------------------------------------------------------------
+   Rebuilt as a two-column list rather than a table of grey chips. The keys
+   are real keycaps matching the ones in the hint bar, so the same visual
+   language means "press this" in both places. Wider, too: at 280px the
+   descriptions wrapped to two ragged lines and the rows lost their rhythm.
+   ====================================================================== */
+.help-popover {
+  width: 340px;
+  max-width: calc(100vw - 28px);
+  padding: 14px 16px 12px;
+}
+
+.help-popover h3 {
+  margin: 0 0 2px; font-size: 13px; font-weight: 700; letter-spacing: -.01em;
+}
+
+.help-popover h4 {
+  margin: 13px 0 6px; font-size: 9px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em; color: var(--faint);
+  display: flex; align-items: center; gap: 8px;
+}
+.help-popover h4::after {
+  content: ''; flex: 1; height: 1px; background: var(--glass-edge);
+}
+
+.shortcut-list { list-style: none; margin: 0; padding: 0; }
+.shortcut-list li {
+  display: grid;
+  /* Fixed key column so every description starts on the same line, which is
+     what makes the list scannable instead of ragged. */
+  grid-template-columns: 112px 1fr;
+  gap: 10px;
+  align-items: baseline;
+  padding: 6px 0;
+  border-top: 1px solid var(--glass-edge);
+}
+.shortcut-list li:first-child { border-top: none; }
+
+.sc-keys { display: flex; flex-wrap: wrap; align-items: center; gap: 3px; }
+.sc-desc { font-size: 10.5px; line-height: 1.45; color: var(--sub); }
+
+.kcombo { display: inline-flex; align-items: center; gap: 2px; }
+.kplus { font-size: 8.5px; color: var(--faint); margin: 0 1px; }
+.sc-or { font-size: 8.5px; color: var(--faint); margin: 0 2px; }
+
+/* The keycap. Same construction as the hint bar: a lighter top face, a
+   thicker bottom border standing in for the key's edge, so it reads as a
+   physical cap rather than a highlighted word. */
+.help-popover kbd,
+#hint kbd {
+  font-family: var(--font-mono);
+  font-size: 9.5px; font-weight: 600; line-height: 1;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%);
+  border: 1px solid var(--rule-strong);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 3px 5px;
+  min-width: 10px; text-align: center;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, .12), inset 0 1px 0 rgba(255, 255, 255, .5);
+  white-space: nowrap;
+}
+[data-theme="dark"] .help-popover kbd,
+[data-theme="dark"] #hint kbd {
+  box-shadow: 0 1px 1px rgba(0, 0, 0, .4), inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+
+/* Mouse gestures are not keys, so they get a different treatment: the verb in
+   accent type, the thing it applies to in plain text. */
+.sc-gesture {
+  font-size: 9.5px; font-weight: 700; color: var(--accent-d);
+  letter-spacing: -.005em;
+}
+.sc-target { font-size: 9.5px; color: var(--faint); }
+[data-theme="dark"] .sc-gesture { color: var(--accent); }

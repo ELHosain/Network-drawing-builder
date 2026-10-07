@@ -1,7 +1,16 @@
 import React, { memo, useEffect, useRef, useState } from 'react';
 import { initials, profileBytes, formatBytes } from '../profiles.js';
 
-function ProfileMenu({ profiles, activeId, onSwitch, onCreate, onRename, onDelete }) {
+// Renders the stored photo when there is one, initials on the profile's colour
+// when there is not. Shared by the chip and every row.
+function Face({ profile }) {
+  if (!profile) return null;
+  return profile.avatar
+    ? <span className="avatar"><img src={profile.avatar} alt="" draggable={false} /></span>
+    : <span className="avatar" style={{ background: profile.color }}>{initials(profile.name)}</span>;
+}
+
+function ProfileMenu({ profiles, activeId, onSwitch, onCreate, onRename, onDelete, onBackToProfiles }) {
   const [open, setOpen] = useState(false);
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState('');
@@ -46,7 +55,7 @@ function ProfileMenu({ profiles, activeId, onSwitch, onCreate, onRename, onDelet
         title={`Working as ${active?.name} — click to switch`}
         aria-expanded={open}
       >
-        <span className="avatar" style={{ background: active?.color }}>{initials(active?.name || '')}</span>
+        <Face profile={active} />
         <span className="profile-name">{active?.name}</span>
         <span className="profile-caret">&#9662;</span>
       </button>
@@ -62,7 +71,7 @@ function ProfileMenu({ profiles, activeId, onSwitch, onCreate, onRename, onDelet
             {profiles.map((p) => (
               <li key={p.id} className={p.id === activeId ? 'current' : ''}>
                 <button className="profile-row" onClick={() => { onSwitch(p.id); setOpen(false); }}>
-                  <span className="avatar" style={{ background: p.color }}>{initials(p.name)}</span>
+                  <Face profile={p} />
                   <span className="profile-row-text">
                     <b>{p.name}</b>
                     <em>{formatBytes(profileBytes(p.id))} stored</em>
@@ -128,6 +137,13 @@ function ProfileMenu({ profiles, activeId, onSwitch, onCreate, onRename, onDelet
           ) : (
             <button className="profile-add" onClick={() => setAdding(true)}>+ Add a workspace</button>
           )}
+
+          <button
+            className="profile-switch"
+            onClick={() => { setOpen(false); onBackToProfiles(); }}
+          >
+            &#8592; Back to workspace chooser
+          </button>
 
           <p className="profile-foot">
             Stored only in this browser on this PC. Not a login — anyone here can switch.

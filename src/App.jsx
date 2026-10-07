@@ -85,7 +85,10 @@ function useTheme(profileId) {
   return [theme, () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))];
 }
 
-export default function App({ profileId, profiles, onSwitchProfile, onCreateProfile, onRenameProfile, onDeleteProfile }) {
+export default function App({
+  profileId, profiles, onSwitchProfile, onCreateProfile, onRenameProfile, onDeleteProfile,
+  onBackToProfiles,
+}) {
   const proj = useProject(profileId);
   const { toast, toastHost } = useToasts();
   const [theme, toggleTheme] = useTheme(profileId);
@@ -667,6 +670,7 @@ export default function App({ profileId, profiles, onSwitchProfile, onCreateProf
             onCreate={onCreateProfile}
             onRename={onRenameProfile}
             onDelete={onDeleteProfile}
+            onBackToProfiles={onBackToProfiles}
           />
         )}
       />

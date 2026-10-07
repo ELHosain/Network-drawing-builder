@@ -72,3 +72,23 @@ export function dataUrlBytes(dataUrl) {
   if (comma < 0) return 0;
   return Math.round(((dataUrl.length - comma - 1) * 3) / 4);
 }
+
+// Square avatar for a profile card. Centre-crops to a square and resizes, so a
+// portrait or landscape photo fills the circle instead of being letterboxed.
+// Deliberately does NOT run the white-background removal that device photos
+// get: a face or a logo on a white card should keep its background.
+export async function processAvatar(src, size = 128) {
+  const img = await loadImage(src);
+  const w = img.naturalWidth || img.width;
+  const h = img.naturalHeight || img.height;
+  const side = Math.min(w, h);
+  const sx = (w - side) / 2;
+  const sy = (h - side) / 2;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+  return encode(canvas, 0.85);
+}

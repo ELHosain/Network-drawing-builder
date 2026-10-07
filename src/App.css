@@ -1701,3 +1701,211 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
   #palette { width: 100%; }
   .pitem { margin: 0 6px 0 0; }
 }
+
+/* ======================================================================
+   Workspace chooser — the app's front door
+   ----------------------------------------------------------------------
+   Same material as the editor behind it: glass panes on the dotted canvas
+   ground, Siemens petrol for the selected state. It reads as the product's
+   own entry screen rather than a separate login page.
+   ====================================================================== */
+.gate {
+  position: fixed; inset: 0; z-index: 500;
+  display: flex; align-items: center; justify-content: center;
+  padding: 32px 20px;
+  overflow-y: auto;
+  background:
+    radial-gradient(circle at 50% 0%, var(--accent-ring), transparent 55%),
+    radial-gradient(circle, var(--canvas-dot) 1px, transparent 1px) 0 0 / 22px 22px,
+    var(--bg);
+  color: var(--ink);
+  animation: gateIn .3s var(--ease);
+}
+@keyframes gateIn { from { opacity: 0; } to { opacity: 1; } }
+
+.gate-inner { width: 100%; max-width: 880px; margin: auto; text-align: center; }
+
+.gate-head { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-bottom: 30px; }
+.gate-logo {
+  width: 52px; height: 52px; border-radius: 14px; margin-bottom: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .35), inset 0 0 0 1px var(--glass-edge);
+}
+.gate-head h1 { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+.gate-sub {
+  margin: 0; font-size: 9.5px; font-weight: 600; color: var(--faint);
+  text-transform: uppercase; letter-spacing: .12em;
+}
+
+.gate-title { margin: 0 0 4px; font-size: 22px; font-weight: 700; letter-spacing: -.02em; }
+.gate-note { margin: 0 0 26px; font-size: 11.5px; color: var(--faint); }
+
+.gate-grid {
+  list-style: none; margin: 0 0 26px; padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(176px, 1fr));
+  gap: 16px;
+  justify-content: center;
+}
+.gate-grid > li { position: relative; }
+
+.gate-card {
+  position: relative;
+  width: 100%;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 26px 16px 18px;
+  border-radius: 18px;
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-edge);
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: inset 0 1px 0 var(--glass-hi), var(--shadow-md);
+  color: var(--ink);
+  cursor: pointer;
+  transition: transform .2s var(--ease), box-shadow .2s var(--ease),
+              border-color .2s var(--ease), background .2s var(--ease);
+}
+.gate-card:hover:not(:disabled) {
+  transform: translateY(-5px);
+  border-color: var(--accent);
+  box-shadow: inset 0 1px 0 var(--glass-hi), 0 0 0 3px var(--accent-ring), var(--shadow-lg);
+  background: var(--glass-strong);
+}
+.gate-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.gate-card:disabled { cursor: default; }
+
+/* The card being opened holds still and lights up, so the choice registers
+   before the editor replaces the screen. */
+.gate-card.chosen {
+  transform: translateY(-5px) scale(.98);
+  border-color: var(--accent);
+  box-shadow: inset 0 1px 0 var(--glass-hi), 0 0 0 4px var(--accent-ring);
+}
+
+.gate-avatar {
+  width: 68px; height: 68px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; flex-shrink: 0;
+  color: #fff; font-size: 22px; font-weight: 700; letter-spacing: .02em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 4px 12px rgba(0, 0, 0, .3);
+  margin-bottom: 10px;
+  transition: transform .2s var(--ease);
+}
+.gate-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gate-card:hover:not(:disabled) .gate-avatar { transform: scale(1.06); }
+
+.gate-name {
+  font-size: 13.5px; font-weight: 650; letter-spacing: -.005em;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.gate-stats {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 10.5px; color: var(--sub);
+}
+.gate-stats b { color: var(--accent-d); font-weight: 700; }
+[data-theme="dark"] .gate-stats b { color: var(--accent); }
+.gate-stats i { width: 3px; height: 3px; border-radius: 50%; background: var(--faint); opacity: .6; }
+
+.gate-meta { font-size: 9.5px; color: var(--faint); }
+
+/* Keyboard shortcut hint, top-left of each card. */
+.gate-key {
+  position: absolute; top: 9px; left: 11px;
+  font-family: var(--font-mono); font-size: 9px; font-weight: 700;
+  color: var(--faint); opacity: .7;
+}
+.gate-last {
+  position: absolute; top: 9px; right: 11px;
+  font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--accent-d); background: var(--accent-light);
+  padding: 2px 7px; border-radius: 99px;
+}
+[data-theme="dark"] .gate-last { color: var(--accent); }
+
+.gate-card.add {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--rule-strong);
+  box-shadow: none;
+  justify-content: center;
+}
+.gate-card.add:hover:not(:disabled) {
+  border-style: dashed; border-color: var(--accent);
+  background: var(--accent-light);
+  box-shadow: none;
+}
+.add-mark {
+  background: transparent;
+  border: 1.5px dashed var(--rule-strong);
+  color: var(--faint);
+  font-size: 26px; font-weight: 400;
+  box-shadow: none;
+}
+.gate-card.add:hover .add-mark { border-color: var(--accent); color: var(--accent-d); }
+[data-theme="dark"] .gate-card.add:hover .add-mark { color: var(--accent); }
+
+/* Rename / delete, revealed on hover so the cards stay clean at rest. */
+.gate-actions {
+  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 2px;
+  opacity: 0; transition: opacity .18s var(--ease);
+}
+.gate-grid > li:hover .gate-actions { opacity: 1; }
+.gate-actions button {
+  padding: 3px 7px; font-size: 11px; border-radius: 6px; color: var(--faint);
+  background: var(--surface); border: 1px solid var(--glass-edge);
+}
+.gate-actions button:hover:not(:disabled) { color: var(--ink); }
+.gate-actions button.danger { color: var(--danger); }
+.gate-actions button:disabled { opacity: .3; }
+
+.gate-foot {
+  margin: 0; font-size: 10px; line-height: 1.5; color: var(--faint);
+  max-width: 420px; margin-inline: auto;
+}
+.gate-foot b { color: var(--sub); font-weight: 600; }
+
+@media (max-width: 520px) {
+  .gate { padding: 20px 14px; }
+  .gate-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+  .gate-title { font-size: 19px; }
+  .gate-avatar { width: 56px; height: 56px; font-size: 18px; }
+}
+
+/* ======================================================================
+   Add-workspace dialog
+   ====================================================================== */
+.ap-panel { width: min(460px, 100%); }
+.ap-body { display: flex; gap: 20px; align-items: flex-start; }
+
+.ap-avatar-col {
+  display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 0 0 auto;
+}
+.ap-avatar-col .gate-avatar { margin-bottom: 0; }
+.ap-avatar-actions { display: flex; flex-direction: column; gap: 3px; }
+.ap-avatar-actions button { font-size: 10px; padding: 4px 9px; }
+
+.ap-name { flex: 1; min-width: 0; }
+.ap-hint { font-style: normal; font-size: 9.5px; color: var(--faint); line-height: 1.4; }
+.ap-error {
+  margin: 12px 0 0; font-size: 10.5px; font-weight: 600; color: var(--danger);
+}
+
+@media (max-width: 460px) {
+  .ap-body { flex-direction: column; align-items: center; }
+  .ap-name { width: 100%; }
+}
+
+/* ======================================================================
+   In-editor chip: avatars, and the way back to the chooser
+   ====================================================================== */
+.avatar { overflow: hidden; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.profile-switch {
+  width: 100%; justify-content: center; margin-top: 7px; padding: 7px;
+  border-radius: 8px; font-size: 10.5px; font-weight: 600;
+  color: var(--accent-d); background: var(--accent-light);
+  border: 1px solid transparent;
+}
+[data-theme="dark"] .profile-switch { color: var(--accent); }
+.profile-switch:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-light); }

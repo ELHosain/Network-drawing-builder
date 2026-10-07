@@ -17,14 +17,19 @@ const ACTIVE_KEY = 'netbuilder-active-profile';
 // The keys the app used before profiles existed. Whatever is sitting in them
 // belongs to whoever has been using this browser, so it is adopted by the
 // first profile rather than being stranded.
+export const SAVE_BASE = 'netbuilder-react-save';
+export const CUSTOM_BASE = 'netbuilder-react-custom-devices';
+
 const LEGACY_KEYS = [
-  'netbuilder-react-save',
-  'netbuilder-react-custom-devices',
+  SAVE_BASE,
+  CUSTOM_BASE,
   'netbuilder-react-hidden-builtins',
   'netbuilder-theme',
 ];
 
-export const PROFILE_COLORS = ['#1f9d55', '#2b7fd4', '#b5760f', '#8e44c4', '#c2485a', '#148f8f'];
+// Fallback avatar colours, drawn around the Siemens Energy petrol/violet pair
+// so a profile without a photo still looks like part of the product.
+export const PROFILE_COLORS = ['#009999', '#641e8c', '#00737d', '#8b4db0', '#0f7a8a', '#4e1670'];
 
 // Every per-profile key is suffixed, so adding a new stored value later needs
 // no extra bookkeeping -- route it through here and it is namespaced for free.
@@ -93,12 +98,23 @@ export function saveActiveId(id) {
   write(ACTIVE_KEY, id);
 }
 
-export function createProfile(list, name) {
-  const id = `p${Date.now().toString(36)}`;
+export function createProfile(list, name, avatar = null) {
+  // The id is the storage namespace for the whole workspace, so a collision
+  // would silently point two profiles at one set of drawings -- the exact
+  // failure this separation exists to prevent. A timestamp alone is not enough:
+  // two profiles created within the same millisecond produced identical ids.
+  // Random entropy plus an explicit check against the ids already in use.
+  const taken = new Set(list.map((p) => p.id));
+  let id;
+  do {
+    id = `p${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+  } while (taken.has(id));
+
   return {
     id,
     name: name.trim() || 'Untitled',
     color: PROFILE_COLORS[list.length % PROFILE_COLORS.length],
+    avatar,
     createdAt: Date.now(),
   };
 }
@@ -138,4 +154,31 @@ export function formatBytes(n) {
   if (n < 1024) return `${n} B`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`;
   return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+// What a profile has in it, read straight from its stored workspace. The
+// selection screen shows this so a returning user can tell their workspaces
+// apart by content rather than by name alone -- which matters when four
+// colleagues share a machine and the names are all first names.
+export function profileStats(profileId) {
+  const stats = { devices: 0, links: 0, custom: 0 };
+  try {
+    const raw = localStorage.getItem(profileKey(SAVE_BASE, profileId));
+    if (raw) {
+      const data = JSON.parse(raw);
+      stats.devices = Array.isArray(data.nodes) ? data.nodes.length : 0;
+      stats.links = Array.isArray(data.wires) ? data.wires.length : 0;
+    }
+  } catch (e) { /* unreadable workspace reports as empty */ }
+  try {
+    const raw = localStorage.getItem(profileKey(CUSTOM_BASE, profileId));
+    if (raw) stats.custom = Object.keys(JSON.parse(raw) || {}).length;
+  } catch (e) { /* ignore */ }
+  return stats;
+}
+
+// Avatars live in the profile index alongside the name, so the selection screen
+// can paint every card without touching each workspace's own storage.
+export function setProfileAvatar(list, id, avatar) {
+  return list.map((p) => (p.id === id ? { ...p, avatar } : p));
 }

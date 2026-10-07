@@ -1799,30 +1799,36 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
 }
 
 /* ---- cards ---- */
+/* Flex, not grid. The cards carry their own animated width now, and a grid
+   track would override it -- the card has to be free to grow and push the
+   others along the row, which is what the dock does. min-height reserves the
+   magnified height so the row does not jump as a card swells. */
 .gate-grid {
   list-style: none; margin: 0 0 30px; padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(188px, 1fr));
+  display: flex; flex-wrap: wrap;
+  align-items: center; justify-content: center;
   gap: 18px;
-  transform-style: preserve-3d;
+  min-height: 272px;
 }
 .gate-grid > li {
   position: relative;
   z-index: 0;
+  flex: 0 0 auto;
   /* Staggered entrance, ordered by --i from the component. */
   animation: gateCardIn .5s var(--ease) both;
   animation-delay: calc(.16s + var(--i, 0) * .07s);
 }
 @keyframes gateCardIn {
-  from { opacity: 0; transform: translateY(22px) rotateX(-10deg); }
+  from { opacity: 0; transform: translateY(22px); }
   to   { opacity: 1; transform: none; }
 }
 
 .gate-card {
   position: relative;
-  width: 100%;
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 28px 16px 20px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px;
+  padding: 22px 16px 18px;
+  box-sizing: border-box;
   border-radius: 20px;
   overflow: hidden;
   color: var(--ink);
@@ -1834,10 +1840,9 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
     inset 0 1px 0 var(--glass-hi),
     0 2px 6px rgba(0, 0, 0, .18),
     0 16px 34px -14px rgba(0, 0, 0, .45);
-  transform-style: preserve-3d;
-  /* At rest the card carries only the magnifier factor; the hover rule folds
-     its lift and tilt into the same transform rather than replacing it. */
-  transform: scale(var(--mag, 1));
+  /* The spring owns width and height; a transition on them would fight it.
+     Nothing here scales or rotates: both resample the card's own text, which
+     is what made the labels look blurred. The lift is a pure translate. */
   transition: transform .26s var(--ease), box-shadow .26s var(--ease),
               border-color .26s var(--ease);
 }
@@ -1860,7 +1865,7 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
 }
 
 .gate-grid .gate-card:hover:not(:disabled) {
-  transform: translateY(-7px) rotateX(5deg) scale(calc(var(--mag, 1) * 1.02));
+  transform: translateY(-6px);
   border-color: var(--accent);
   box-shadow:
     inset 0 1px 0 var(--glass-hi),
@@ -1874,14 +1879,17 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
 /* The card being opened settles and floods with petrol, so the choice reads
    before the editor replaces the screen. */
 .gate-grid .gate-card.chosen {
-  transform: translateY(-7px) scale(calc(var(--mag, 1) * .97));
+  transform: translateY(-6px);
   border-color: var(--accent);
   box-shadow: inset 0 1px 0 var(--glass-hi), 0 0 0 5px var(--accent-ring),
               0 0 60px -10px var(--accent);
 }
 
 .gate-avatar {
-  width: 72px; height: 72px; border-radius: 50%;
+  /* A share of the card, so it grows with the magnification while staying a
+     real layout box -- a transform here would soften the initials inside it. */
+  width: 36%; aspect-ratio: 1; height: auto; border-radius: 50%;
+  min-width: 0;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden; flex-shrink: 0;
   margin-bottom: 12px;
@@ -1898,7 +1906,7 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
 }
 .gate-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .gate-card:hover:not(:disabled) .gate-avatar {
-  transform: translateY(-3px) scale(1.07);
+  transform: translateY(-2px);
   box-shadow:
     inset 0 2px 0 rgba(255, 255, 255, .3),
     0 12px 24px -8px rgba(0, 0, 0, .6),
@@ -1991,7 +1999,7 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
   .gate { padding: 24px 14px; }
   .gate-grid { grid-template-columns: repeat(auto-fit, minmax(146px, 1fr)); gap: 12px; }
   .gate-title { font-size: 21px; }
-  .gate-avatar { width: 58px; height: 58px; font-size: 19px; }
+  .gate-avatar { font-size: 19px; }
 }
 
 /* The stage tilt, the sheen and the drifting aurora are all decoration. */
@@ -2013,7 +2021,7 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
 .ap-avatar-col {
   display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 0 0 auto;
 }
-.ap-avatar-col .gate-avatar { margin-bottom: 0; }
+.ap-avatar-col .gate-avatar { margin-bottom: 0; width: 72px; }
 .ap-avatar-actions { display: flex; flex-direction: column; gap: 3px; }
 .ap-avatar-actions button { font-size: 10px; padding: 4px 9px; }
 

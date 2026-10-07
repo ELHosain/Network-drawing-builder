@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { initials, profileStats, formatBytes, profileBytes } from '../profiles.js';
-import { useMagnify } from '../useMagnify.js';
+import { useMotionValue } from 'framer-motion';
+import GateCard from './GateCard.jsx';
 import AddProfileDialog from './AddProfileDialog.jsx';
 
 function Avatar({ profile }) {
@@ -25,10 +26,18 @@ function Avatar({ profile }) {
 export default function ProfileGate({
   profiles, lastUsedId, onSelect, onCreate, onRename, onDelete,
 }) {
-  // Horizontal: the cards sit in a row. Gentler than the dock -- these are
-  // large targets, so a little swell reads as plenty.
-  const { containerRef, magnifyProps } = useMagnify({ axis: 'x', max: 1.09, distance: 300 });
   const [adding, setAdding] = useState(false);
+  // One pointer position shared by every card, so a pointer move costs a single
+  // motion-value write rather than a React render of the whole row.
+  const mouseX = useMotionValue(Number.POSITIVE_INFINITY);
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const apply = () => setReduced(mq.matches);
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, []);
   const [busyId, setBusyId] = useState(null);
 
   // Read once per mount rather than per render: each call walks localStorage,
@@ -72,15 +81,20 @@ export default function ProfileGate({
           Each workspace keeps its own drawings, device library and settings on this computer.
         </p>
 
-        <ul className="gate-grid" ref={containerRef} {...magnifyProps}>
+        <ul
+          className="gate-grid"
+          onMouseMove={(e) => mouseX.set(e.clientX)}
+          onMouseLeave={() => mouseX.set(Number.POSITIVE_INFINITY)}
+        >
           {profiles.map((p, i) => {
             const s = stats[p.id] || { devices: 0, links: 0, custom: 0, bytes: 0 };
             const empty = s.devices === 0 && s.links === 0;
             return (
               <li key={p.id} style={{ '--i': i }}>
-                <button
-                  data-magnify
-                  className={`gate-card${busyId === p.id ? ' chosen' : ''}`}
+                <GateCard
+                  mouseX={mouseX}
+                  reduced={reduced}
+                  className={busyId === p.id ? 'chosen' : ''}
                   onClick={() => choose(p.id)}
                   disabled={busyId !== null}
                 >
@@ -106,7 +120,7 @@ export default function ProfileGate({
                     {s.custom > 0 ? `${s.custom} custom device${s.custom !== 1 ? 's' : ''} · ` : ''}
                     {formatBytes(s.bytes)}
                   </span>
-                </button>
+                </GateCard>
 
                 {/* Shares the top-right corner with the "Last used" badge and
                     fades in over it, so the two can never collide the way the
@@ -143,11 +157,17 @@ export default function ProfileGate({
           })}
 
           <li style={{ '--i': profiles.length }}>
-            <button data-magnify className="gate-card add" onClick={() => setAdding(true)} disabled={busyId !== null}>
+            <GateCard
+              mouseX={mouseX}
+              reduced={reduced}
+              className="add"
+              onClick={() => setAdding(true)}
+              disabled={busyId !== null}
+            >
               <span className="gate-avatar add-mark">+</span>
               <span className="gate-name">Add workspace</span>
               <span className="gate-meta">A fresh canvas and library</span>
-            </button>
+            </GateCard>
           </li>
         </ul>
 

@@ -64,7 +64,7 @@ function Toolbar({
   const fileRef = useRef(null);
   // Horizontal, and gentler than the dock: these are small targets that get
   // clicked constantly, so the scale stays subtle enough not to distract.
-  const { containerRef, magnifyProps } = useMagnify({ axis: 'x', max: 1.12, distance: 110 });
+  const { containerRef, magnifyProps } = useMagnify({ axis: 'x', max: 1.3, distance: 95 });
 
   const handleLoadFile = (e) => {
     const file = e.target.files[0];
@@ -146,7 +146,6 @@ function Toolbar({
         </Group>
 
         <button data-magnify
-          data-magnify
           className="theme-toggle"
           onClick={onToggleTheme}
           title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}

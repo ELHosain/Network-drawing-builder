@@ -39,7 +39,7 @@ export function useMagnify({
     const p = pointer.current;
 
     items.forEach((el) => {
-      if (p === null) { el.style.transform = ''; return; }
+      if (p === null) { el.style.transform = ''; el.style.zIndex = ''; return; }
       const r = el.getBoundingClientRect();
       const centre = axis === 'x' ? r.left + r.width / 2 : r.top + r.height / 2;
       const d = Math.abs(p - centre);
@@ -48,7 +48,15 @@ export function useMagnify({
       // the range, so neighbours blend instead of ending on a visible corner.
       const strength = (Math.cos(t * Math.PI) + 1) / 2;
       const scale = 1 + (max - 1) * strength;
-      el.style.transform = scale > 1.001 ? `scale(${scale.toFixed(4)})` : '';
+      if (scale > 1.001) {
+        el.style.transform = `scale(${scale.toFixed(4)})`;
+        // The nearest item has to paint over its neighbours, or the one after
+        // it in DOM order overlaps the part that just grew.
+        el.style.zIndex = String(Math.round(scale * 100));
+      } else {
+        el.style.transform = '';
+        el.style.zIndex = '';
+      }
     });
   }, [axis, max, distance, selector]);
 
@@ -74,7 +82,7 @@ export function useMagnify({
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
     if (!mq.matches) return undefined;
     const root = containerRef.current;
-    root?.querySelectorAll(selector).forEach((el) => { el.style.transform = ''; });
+    root?.querySelectorAll(selector).forEach((el) => { el.style.transform = ''; el.style.zIndex = ''; });
     pointer.current = null;
     return undefined;
   }, [selector]);

@@ -1615,3 +1615,30 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
 @media (prefers-reduced-motion: reduce) {
   [data-magnify] { transition: none; transform: none !important; }
 }
+
+/* ======================================================================
+   Magnification headroom
+   ----------------------------------------------------------------------
+   The palette scrolls, so it clips on BOTH axes -- a tile that filled its
+   width could only grow by the padding before being cut off at the edge
+   (about 1.13x, which is why the effect looked like nothing was happening).
+   The tiles are now narrower than the column and centred, so there is real
+   room to scale into: 146px of inner width against a 116px tile is 1.26x.
+   ====================================================================== */
+#palette { width: 170px; padding: 11px 12px; }
+
+.pitem {
+  width: 116px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 8px;
+}
+
+/* z-index only applies to a positioned element, and the hook raises the
+   nearest control so it paints over the ones beside it. */
+[data-magnify] { position: relative; }
+
+/* A little more room between toolbar controls, so a magnified button has
+   somewhere to expand into instead of sitting on its neighbour. */
+.tgroup { gap: 4px; }
+.tools { gap: 10px; }

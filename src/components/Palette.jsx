@@ -18,7 +18,7 @@ function Palette({
   const fileInputRef = useRef(null);
   // Vertical: the palette is a column, so distance is measured on Y. The list
   // scrolls, so this must not affect layout -- a transform does not.
-  const { containerRef, magnifyProps } = useMagnify({ axis: 'y', max: 1.1, distance: 150 });
+  const { containerRef, magnifyProps } = useMagnify({ axis: 'y', max: 1.24, distance: 125 });
   const [query, setQuery] = useState('');
 
   const q = query.trim().toLowerCase();
@@ -66,7 +66,6 @@ function Palette({
           <div
             key={key}
             className="pitem" data-magnify
-          data-magnify
             onPointerDown={(e) => { if (!e.target.closest('.rm')) onStartDrag(key, presets[key]?.name, e); }}
           >
             <button
@@ -84,7 +83,7 @@ function Palette({
         ))}
       </div>
       {!q && (
-        <div className="pitem" id="addCustom" onClick={() => fileInputRef.current?.click()}>
+        <div className="pitem" data-magnify id="addCustom" onClick={() => fileInputRef.current?.click()}>
           <div style={{ fontSize: 20, lineHeight: 1 }}>+</div>
           <span>Add photo</span>
         </div>
@@ -109,7 +108,6 @@ function Palette({
         <div
           key={key}
           className="pitem" data-magnify
-          data-magnify
           onPointerDown={(e) => { if (!e.target.closest('.rm')) onStartDrag(key, presets[key]?.name, e); }}
         >
           <button
@@ -128,7 +126,6 @@ function Palette({
       {!q && (
         <div
           className="pitem" data-magnify
-          data-magnify
           onPointerDown={(e) => onStartDrag('generic', 'device', e)}
         >
           <div className="placeholder-img" style={{ width: 42, height: 34 }} />

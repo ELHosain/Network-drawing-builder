@@ -1452,3 +1452,114 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
 @media (max-width: 900px) {
   footer #hint { display: none; }
 }
+
+/* ======================================================================
+   Floating quick-action dock
+   ----------------------------------------------------------------------
+   Sits over the drawing, centred at the bottom. Carries the handful of
+   actions reached most often mid-drawing; the toolbar still owns everything.
+
+   Positioned in #main rather than #canvasWrap: that element scrolls, and
+   anything absolute inside it scrolls away with the drawing.
+   ====================================================================== */
+.dock {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  z-index: 14;
+
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 20px;
+
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-edge);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: inset 0 1px 0 var(--glass-hi), var(--shadow-lg);
+
+  animation: dockIn .28s var(--ease);
+}
+@keyframes dockIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* The specular top edge, same material as every other glass surface. */
+.dock::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(180deg, var(--glass-hi) 0%, transparent 46%);
+  opacity: .5;
+}
+
+.dock-item {
+  position: relative;
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--glass-edge);
+  background: linear-gradient(180deg, var(--surface) 0%, var(--surface-3) 100%);
+  color: var(--sub);
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 var(--glass-hi), 0 2px 5px rgba(0, 0, 0, .18);
+  /* Width and height are driven by the spring, so they must not transition. */
+  transition: background .16s var(--ease), color .16s var(--ease), border-color .16s var(--ease);
+}
+.dock-item:hover:not(:disabled) {
+  background: linear-gradient(180deg, #008080 0%, var(--accent-d) 100%);
+  border-color: var(--accent-d);
+  color: #fff;
+}
+.dock-item:disabled { opacity: .35; cursor: default; }
+.dock-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* The icon must not scale with the button, or it would blur and crowd the
+   edge at full magnification. It stays put while the disc grows around it. */
+.dock-icon {
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.dock-icon svg { width: 17px; height: 17px; }
+
+.dock-badge {
+  position: absolute; top: 1px; right: 1px;
+  min-width: 15px; height: 15px; padding: 0 4px;
+  border-radius: 99px;
+  background: var(--accent); color: #fff;
+  font-size: 9px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1.5px solid var(--surface);
+  pointer-events: none;
+}
+.dock-item:nth-child(5) .dock-badge { background: var(--danger); }
+
+.dock-label {
+  position: absolute; bottom: 100%; left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 4px;
+  padding: 4px 9px;
+  border-radius: 7px;
+  white-space: nowrap;
+  font-size: 10.5px; font-weight: 600; letter-spacing: .01em;
+  color: var(--ink);
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-edge);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+}
+
+/* Editor chrome: never part of an exported drawing. */
+#canvas.exporting .dock { display: none !important; }
+
+/* The check panel (left) and snapshot tray (right) are each ~300px wide and
+   bottom-anchored. Below this the three would overlap, and the toolbar
+   already carries every one of these actions. */
+@media (max-width: 1000px) {
+  .dock { display: none; }
+}

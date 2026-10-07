@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback, useEffect, useLayoutEffect, useMemo } from 'react';
+import React, { useRef, useState, useCallback, useEffect, useLayoutEffect, useMemo, lazy, Suspense } from 'react';
 import './App.css';
 import Toolbar from './components/Toolbar.jsx';
 import Palette from './components/Palette.jsx';
@@ -8,11 +8,21 @@ import { useToasts } from './components/Toasts.jsx';
 import SnapshotTray from './components/SnapshotTray.jsx';
 import { useSnapshots } from './useSnapshots.js';
 import { useProject } from './useProject.js';
+
+// The dock is the only thing pulling in framer-motion (~40KB gzipped). It is
+// decorative chrome over the canvas, not something needed to start drawing, so
+// it loads on its own after the app is interactive. It animates itself in on
+// mount regardless, which makes the deferred arrival invisible.
+const Dock = lazy(() => import('./components/Dock.jsx'));
 import { BUILTIN_PRESETS } from './data/presets.js';
 import { processDeviceImage } from './utils/imageTools.js';
 import { routeWire, routeGhost } from './utils/routing.js';
 import ProfileMenu from './components/ProfileMenu.jsx';
 import ValidationPanel from './components/ValidationPanel.jsx';
+
+import {
+  UndoIcon, RedoIcon, FitIcon, CameraIcon, ShieldIcon, DownloadIcon,
+} from './components/icons.jsx';
 import DrawingDetailsDialog from './components/DrawingDetailsDialog.jsx';
 import { validateProject } from './utils/validate.js';
 import { profileKey } from './profiles.js';
@@ -599,6 +609,18 @@ export default function App({ profileId, profiles, onSwitchProfile, onCreateProf
   const handleDelete = useCallback((id) => projRef.current.deleteNode(id), []);
   const handleFieldChange = useCallback((id, field, value) => projRef.current.updateNode(id, { [field]: value }), []);
 
+  // The floating dock carries a few big, deliberate actions over the canvas.
+  // Everything here also exists in the toolbar -- this is a shortcut for the
+  // things reached most often mid-drawing, not a replacement for it.
+  const dockItems = useMemo(() => [
+    { key: 'undo', label: 'Undo', icon: <UndoIcon />, onClick: () => { proj.undo(); toast('Undone'); }, disabled: !proj.canUndo },
+    { key: 'redo', label: 'Redo', icon: <RedoIcon />, onClick: () => { proj.redo(); toast('Redone'); }, disabled: !proj.canRedo },
+    { key: 'fit', label: 'Fit to screen', icon: <FitIcon />, onClick: handleFit },
+    { key: 'capture', label: 'Capture snapshot', icon: <CameraIcon />, onClick: snaps.capture, badge: snaps.shots.length },
+    { key: 'check', label: 'Drawing check', icon: <ShieldIcon />, onClick: () => setCheckOpen((o) => !o), badge: check.counts.error },
+    { key: 'png', label: 'Export PNG', icon: <DownloadIcon />, onClick: () => requestSave('png') },
+  ], [proj, toast, handleFit, snaps.capture, snaps.shots.length, check.counts.error, requestSave]);
+
   return (
     <div id="app">
       <Toolbar
@@ -740,6 +762,7 @@ export default function App({ profileId, profiles, onSwitchProfile, onCreateProf
           onClose={() => setCheckOpen(false)}
           onFocusNode={focusNode}
         />
+        <Suspense fallback={null}><Dock items={dockItems} /></Suspense>
         {snaps.flashing && <div id="snapFlash" aria-hidden="true" />}
         <SnapshotTray
           shots={snaps.shots}

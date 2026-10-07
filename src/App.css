@@ -1664,8 +1664,10 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
 
 /* Sized as a share of the tile so the device photo magnifies with its card. */
 .pitem img {
-  width: 46%;
-  height: 46%;
+  /* Share of the tile, so the photo grows proportionally as the tile
+     magnifies. Raised from 46% -- the devices read too small at rest. */
+  width: 72%;
+  height: 64%;
   min-height: 0;
   object-fit: contain;
   pointer-events: none;

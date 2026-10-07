@@ -624,8 +624,15 @@ export default function App({
     { key: 'png', label: 'Export PNG', icon: <DownloadIcon />, onClick: () => requestSave('png') },
   ], [proj, toast, handleFit, snaps.capture, snaps.shots.length, check.counts.error, requestSave]);
 
+  // The colour of the workspace being entered, used by the arrival veil so the
+  // editor appears to come out of the avatar that just flew at the screen.
+  const enteringColor = (profiles || []).find((p) => p.id === profileId)?.color;
+
   return (
     <div id="app">
+      {/* One-shot: it mounts with the editor, plays once and is gone. App is
+          keyed by profile id, so this replays on every workspace switch. */}
+      <div className="app-arrive" style={{ '--enter': enteringColor }} aria-hidden="true" />
       <Toolbar
         zoom={proj.zoom}
         onZoomIn={() => setZoomClamped(proj.zoom + 0.1)}

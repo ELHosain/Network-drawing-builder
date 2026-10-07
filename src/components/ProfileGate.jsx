@@ -1,17 +1,27 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import { initials, profileStats, formatBytes, profileBytes } from '../profiles.js';
-import { useMotionValue } from 'framer-motion';
 import GateCard from './GateCard.jsx';
 import AddProfileDialog from './AddProfileDialog.jsx';
 
-function Avatar({ profile }) {
-  return profile.avatar ? (
-    <span className="gate-avatar">
-      <img src={profile.avatar} alt="" draggable={false} />
-    </span>
-  ) : (
-    <span className="gate-avatar" style={{ '--face': profile.color }}>
-      {initials(profile.name)}
+// How long the launch runs before the editor takes over. The flight lands just
+// before the handover, so the editor appears to come out of it.
+const LAUNCH_MS = 700;
+
+function AvatarFace({ profile }) {
+  return profile.avatar
+    ? <img src={profile.avatar} alt="" draggable={false} />
+    : <>{initials(profile.name)}</>;
+}
+
+function Avatar({ profile, innerRef }) {
+  return (
+    <span
+      className="gate-avatar"
+      ref={innerRef}
+      style={profile.avatar ? undefined : { '--face': profile.color }}
+    >
+      <AvatarFace profile={profile} />
     </span>
   );
 }
@@ -38,35 +48,59 @@ export default function ProfileGate({
     mq.addEventListener('change', apply);
     return () => mq.removeEventListener('change', apply);
   }, []);
-  const [busyId, setBusyId] = useState(null);
 
-  // Read once per mount rather than per render: each call walks localStorage,
-  // and nothing here changes while the screen is up.
+  // The launch in progress: which profile, and where its avatar sat on screen
+  // when it was clicked. Null until a card is chosen.
+  const [launch, setLaunch] = useState(null);
+  const avatarRefs = useRef(new Map());
+  const timerRef = useRef(0);
+
   const stats = useMemo(
     () => Object.fromEntries(profiles.map((p) => [p.id, { ...profileStats(p.id), bytes: profileBytes(p.id) }])),
     [profiles],
   );
 
-  // A brief hold on the chosen card before handing over, so the selection
-  // registers visually instead of the editor appearing to flash into place.
-  const choose = (id) => {
-    setBusyId(id);
-    setTimeout(() => onSelect(id), 200);
-  };
+  // Snapshots the avatar's position on screen, then flies a copy of it from
+  // exactly there to the centre. Measuring at click time rather than assuming a
+  // position is what puts the copy precisely on top of the original for the
+  // first frame, so it reads as that avatar lifting off its card rather than a
+  // second one appearing from nowhere.
+  const choose = useCallback((id) => {
+    if (launch) return;
+    const profile = profiles.find((p) => p.id === id);
+    if (!profile) return;
+    const el = avatarRefs.current.get(id);
+    setLaunch({ id, profile, rect: el ? el.getBoundingClientRect() : null });
+    timerRef.current = setTimeout(() => onSelect(id), reduced ? 120 : LAUNCH_MS);
+  }, [launch, profiles, onSelect, reduced]);
+
+  useEffect(() => () => clearTimeout(timerRef.current), []);
 
   useEffect(() => {
     const onKey = (e) => {
-      if (adding || busyId) return;
+      if (adding || launch) return;
       const n = parseInt(e.key, 10);
       if (n >= 1 && n <= Math.min(9, profiles.length)) choose(profiles[n - 1].id);
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profiles, adding, busyId]);
+  }, [profiles, adding, launch, choose]);
+
+  // Where the flying avatar ends up: dead centre, grown past the viewport, so
+  // it reads as the workspace opening out rather than an icon drifting away.
+  const flightTarget = () => {
+    const end = Math.max(window.innerWidth, window.innerHeight) * 1.25;
+    return {
+      width: end,
+      height: end,
+      fontSize: end * 0.26,
+      top: window.innerHeight / 2 - end / 2,
+      left: window.innerWidth / 2 - end / 2,
+    };
+  };
 
   return (
-    <div className="gate">
+    <div className={`gate${launch ? ' launching' : ''}`}>
       <div className="gate-glow" aria-hidden="true" />
 
       <div className="gate-inner">
@@ -83,26 +117,33 @@ export default function ProfileGate({
 
         <ul
           className="gate-grid"
-          onMouseMove={(e) => mouseX.set(e.clientX)}
+          onMouseMove={(e) => { if (!launch) mouseX.set(e.clientX); }}
           onMouseLeave={() => mouseX.set(Number.POSITIVE_INFINITY)}
         >
           {profiles.map((p, i) => {
             const s = stats[p.id] || { devices: 0, links: 0, custom: 0, bytes: 0 };
             const empty = s.devices === 0 && s.links === 0;
+            const chosen = launch?.id === p.id;
             return (
-              <li key={p.id} style={{ '--i': i }}>
+              <li key={p.id} style={{ '--i': i }} className={launch && !chosen ? 'dimmed' : ''}>
                 <GateCard
                   mouseX={mouseX}
                   reduced={reduced}
-                  className={busyId === p.id ? 'chosen' : ''}
+                  className={chosen ? 'chosen' : ''}
                   onClick={() => choose(p.id)}
-                  disabled={busyId !== null}
+                  disabled={launch !== null}
                 >
                   <span className="gate-sheen" aria-hidden="true" />
                   {i < 9 && <span className="gate-key">{i + 1}</span>}
                   {p.id === lastUsedId && <span className="gate-last">Last used</span>}
 
-                  <Avatar profile={p} />
+                  <Avatar
+                    profile={p}
+                    innerRef={(el) => {
+                      if (el) avatarRefs.current.set(p.id, el);
+                      else avatarRefs.current.delete(p.id);
+                    }}
+                  />
 
                   <span className="gate-name">{p.name}</span>
 
@@ -156,13 +197,13 @@ export default function ProfileGate({
             );
           })}
 
-          <li style={{ '--i': profiles.length }}>
+          <li style={{ '--i': profiles.length }} className={launch ? 'dimmed' : ''}>
             <GateCard
               mouseX={mouseX}
               reduced={reduced}
               className="add"
               onClick={() => setAdding(true)}
-              disabled={busyId !== null}
+              disabled={launch !== null}
             >
               <span className="gate-avatar add-mark">+</span>
               <span className="gate-name">Add workspace</span>
@@ -176,6 +217,41 @@ export default function ProfileGate({
           editor to keep a backup file of anything important.
         </p>
       </div>
+
+      {/* The flight sits OUTSIDE .gate-inner on purpose: that element recedes
+          and blurs during a launch, and the avatar has to stay sharp while it
+          travels. Width and height are animated rather than a scale, for the
+          same reason the cards are -- a scaled bitmap would soften the face or
+          the initials exactly when they are largest. */}
+      <AnimatePresence>
+        {launch && launch.rect && !reduced && (
+          <motion.div
+            key="flight"
+            className="gate-flight"
+            aria-hidden="true"
+            style={{ '--face': launch.profile.color }}
+            initial={{
+              top: launch.rect.top,
+              left: launch.rect.left,
+              width: launch.rect.width,
+              height: launch.rect.height,
+              fontSize: Math.max(16, launch.rect.width * 0.32),
+              opacity: 1,
+            }}
+            animate={{ ...flightTarget(), opacity: 0 }}
+            transition={{
+              duration: LAUNCH_MS / 1000,
+              ease: [0.55, 0, 0.25, 1],
+              opacity: {
+                delay: (LAUNCH_MS / 1000) * 0.45,
+                duration: (LAUNCH_MS / 1000) * 0.55,
+              },
+            }}
+          >
+            <AvatarFace profile={launch.profile} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AddProfileDialog
         open={adding}

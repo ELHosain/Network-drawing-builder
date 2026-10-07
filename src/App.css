@@ -1462,17 +1462,28 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
    Positioned in #main rather than #canvasWrap: that element scrolls, and
    anything absolute inside it scrolls away with the drawing.
    ====================================================================== */
-.dock {
+/* The shell reserves vertical room so a magnified icon rises into empty space
+   rather than colliding with the drawing above it. Its height is animated. */
+.dock-shell {
   position: absolute;
   left: 50%;
   bottom: 18px;
   transform: translateX(-50%);
   z-index: 14;
-
   display: flex;
   align-items: flex-end;
+  pointer-events: none;
+  animation: dockIn .28s var(--ease);
+}
+
+.dock {
+  pointer-events: auto;
+  display: flex;
+  /* Items are anchored to the bottom edge, so growing one pushes it upward
+     out of the panel -- the macOS behaviour, and why the shell reserves room. */
+  align-items: flex-end;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 0 12px 8px;
   border-radius: 20px;
 
   background: var(--glass-strong);
@@ -1480,8 +1491,7 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   box-shadow: inset 0 1px 0 var(--glass-hi), var(--shadow-lg);
-
-  animation: dockIn .28s var(--ease);
+  position: relative;
 }
 @keyframes dockIn {
   from { opacity: 0; transform: translateX(-50%) translateY(12px); }

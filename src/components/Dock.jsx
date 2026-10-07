@@ -6,44 +6,50 @@ import {
 // A macOS-style magnifying dock, ported from the Tailwind/TypeScript original
 // to this project's plain CSS and design tokens.
 //
-// Two deliberate changes from the source:
+// Differences from the source, each for a reason:
 //
-// 1. It tracks clientX, not pageX. The original compared pageX against
-//    getBoundingClientRect(), which is viewport-relative -- so every item
-//    magnified at the wrong offset the moment the page was scrolled. Mixing
-//    the two coordinate spaces is a latent bug even where it happens to look
-//    right.
+// 1. Tracks clientX, not pageX. The original compared pageX against
+//    getBoundingClientRect(), which is viewport-relative, so items magnified
+//    at the wrong offset once the page scrolled.
 //
-// 2. Magnification is disabled under prefers-reduced-motion. The whole effect
-//    is motion for its own sake, which is exactly what that setting asks us
-//    not to do.
-const DEFAULT_SPRING = { mass: 0.1, stiffness: 150, damping: 12 };
+// 2. Reduced motion removes the spring but keeps the magnification. Disabling
+//    the size change outright left the dock looking inert; a snap to size
+//    carries the same affordance without anything bouncing.
+const SPRING = { mass: 0.1, stiffness: 170, damping: 14 };
+const SPRING_REDUCED = { mass: 0.1, stiffness: 900, damping: 40 };
 
 function DockItem({
   children, label, onClick, badge, disabled,
-  mouseX, spring, distance, magnification, baseItemSize, reduced,
+  mouseX, distance, magnification, baseItemSize, reduced,
 }) {
   const ref = useRef(null);
   const [hovered, setHovered] = useState(false);
 
+  // The item's centre is measured from its LEFT edge plus half the BASE size,
+  // never half its current width. Using the live width feeds the item's own
+  // magnification back into the distance that drives it: as it grows, its
+  // measured centre drifts away from the cursor, which shrinks it again. The
+  // result is an item that barely moves. The base size is a constant, so the
+  // distance depends only on the pointer.
   const mouseDistance = useTransform(mouseX, (val) => {
     const rect = ref.current?.getBoundingClientRect();
     if (!rect) return Number.POSITIVE_INFINITY;
-    return val - rect.x - rect.width / 2;
+    return val - rect.left - baseItemSize / 2;
   });
 
   const targetSize = useTransform(
     mouseDistance,
     [-distance, 0, distance],
     [baseItemSize, magnification, baseItemSize],
+    { clamp: true },
   );
-  const size = useSpring(targetSize, spring);
+  const size = useSpring(targetSize, reduced ? SPRING_REDUCED : SPRING);
 
   return (
     <motion.button
       ref={ref}
       type="button"
-      style={reduced ? { width: baseItemSize, height: baseItemSize } : { width: size, height: size }}
+      style={{ width: size, height: size }}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
       onFocus={() => setHovered(true)}
@@ -61,12 +67,9 @@ function DockItem({
           <motion.span
             className="dock-label"
             role="tooltip"
-            // The centring offset has to be a motion value, not CSS. Animating
-            // y makes framer-motion write an inline transform, which REPLACES
-            // any transform from the stylesheet -- so a CSS translateX(-50%)
-            // silently disappeared the moment the label animated, leaving it
-            // hanging half a width to the right of its button. Handing x to
-            // framer-motion lets both compose into one transform.
+            // The centring offset must be a motion value, not CSS: animating y
+            // makes framer-motion write an inline transform, which replaces any
+            // transform from the stylesheet.
             style={{ x: '-50%' }}
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: -6 }}
@@ -83,13 +86,13 @@ function DockItem({
 
 function Dock({
   items,
-  spring = DEFAULT_SPRING,
-  magnification = 62,
-  distance = 150,
-  panelHeight = 56,
-  baseItemSize = 40,
+  magnification = 70,
+  distance = 170,
+  panelHeight = 58,
+  baseItemSize = 42,
 }) {
   const mouseX = useMotionValue(Number.POSITIVE_INFINITY);
+  const isHovered = useMotionValue(0);
   const [reduced, setReduced] = useState(false);
 
   useEffect(() => {
@@ -100,33 +103,42 @@ function Dock({
     return () => mq.removeEventListener('change', apply);
   }, []);
 
+  // A magnified icon stands taller than the panel, exactly as it does on
+  // macOS. The shell grows to reserve that room so the icons rise into empty
+  // space instead of colliding with whatever sits above the dock.
+  const shellHeight = useSpring(
+    useTransform(isHovered, [0, 1], [panelHeight, magnification + 26]),
+    reduced ? SPRING_REDUCED : SPRING,
+  );
+
   return (
-    <div
-      className="dock"
-      style={{ height: panelHeight }}
-      role="toolbar"
-      aria-label="Quick actions"
-      onMouseMove={(e) => mouseX.set(e.clientX)}
-      onMouseLeave={() => mouseX.set(Number.POSITIVE_INFINITY)}
-    >
-      {items.map((item) => (
-        <DockItem
-          key={item.key}
-          label={item.label}
-          onClick={item.onClick}
-          badge={item.badge}
-          disabled={item.disabled}
-          mouseX={mouseX}
-          spring={spring}
-          distance={distance}
-          magnification={magnification}
-          baseItemSize={baseItemSize}
-          reduced={reduced}
-        >
-          {item.icon}
-        </DockItem>
-      ))}
-    </div>
+    <motion.div className="dock-shell" style={{ height: shellHeight }}>
+      <div
+        className="dock"
+        style={{ height: panelHeight }}
+        role="toolbar"
+        aria-label="Quick actions"
+        onMouseMove={(e) => { isHovered.set(1); mouseX.set(e.clientX); }}
+        onMouseLeave={() => { isHovered.set(0); mouseX.set(Number.POSITIVE_INFINITY); }}
+      >
+        {items.map((item) => (
+          <DockItem
+            key={item.key}
+            label={item.label}
+            onClick={item.onClick}
+            badge={item.badge}
+            disabled={item.disabled}
+            mouseX={mouseX}
+            distance={distance}
+            magnification={magnification}
+            baseItemSize={baseItemSize}
+            reduced={reduced}
+          >
+            {item.icon}
+          </DockItem>
+        ))}
+      </div>
+    </motion.div>
   );
 }
 

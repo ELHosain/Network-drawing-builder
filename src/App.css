@@ -2347,3 +2347,32 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
    ever needed. */
 .gate-avatar { overflow: visible; }
 .gate-avatar img { border-radius: 50%; }
+
+/* ======================================================================
+   Light rays — the chooser's atmosphere
+   ----------------------------------------------------------------------
+   Sits between the dotted ground and the content: above the CSS aurora it
+   builds on, below every card and the flying avatar. It never takes pointer
+   events, so the cards behind it stay clickable.
+   ====================================================================== */
+.light-rays {
+  position: absolute; inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  /* Fades up once WebGL has a first frame, so it arrives rather than snaps. */
+  animation: raysIn 1.1s var(--ease) both;
+}
+@keyframes raysIn { from { opacity: 0; } to { opacity: .85; } }
+
+/* During a launch the rays recede with everything else. */
+.gate.launching .light-rays {
+  animation: raysOut var(--launch, .7s) var(--ease) forwards;
+}
+@keyframes raysOut { to { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  /* The rays themselves already slow to a drift in the component; this just
+     stops the fade-in from being one more thing moving at load. */
+  .light-rays { animation: none; opacity: .7; }
+}

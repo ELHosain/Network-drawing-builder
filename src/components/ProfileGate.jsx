@@ -1,8 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import { initials, profileStats, formatBytes, profileBytes } from '../profiles.js';
 import GateCard from './GateCard.jsx';
 import AddProfileDialog from './AddProfileDialog.jsx';
+
+// Lazy so the WebGL library stays out of the startup bundle. The CSS aurora
+// below renders immediately and the rays fade in over it once loaded, so there
+// is nothing to see pop in.
+const LightRays = lazy(() => import('./LightRays.jsx'));
 
 // How long the launch runs before the editor takes over. The flight lands just
 // before the handover, so the editor appears to come out of it.
@@ -111,6 +116,21 @@ export default function ProfileGate({
   return (
     <div className={`gate${launch ? ' launching' : ''}`} style={{ '--launch': `${launchSeconds}s` }}>
       <div className="gate-glow" aria-hidden="true" />
+      <Suspense fallback={null}>
+        <LightRays
+          raysOrigin="top-center"
+          raysColor="#009999"
+          raysColor2="#641e8c"
+          raysSpeed={0.7}
+          lightSpread={1.1}
+          rayLength={1.9}
+          followMouse
+          mouseInfluence={0.12}
+          noiseAmount={0.03}
+          distortion={0.05}
+          saturation={0.95}
+        />
+      </Suspense>
 
       <div className="gate-inner">
         <div className="gate-head">

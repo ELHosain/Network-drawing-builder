@@ -59,7 +59,7 @@ function Toolbar({
   theme, onToggleTheme,
   locked, onToggleLock,
   helpOpen, onToggleHelp,
-  profileMenu,
+  profileMenu, onBackToProfiles,
 }) {
   const fileRef = useRef(null);
   // Horizontal, and gentler than the dock: these are small targets that get
@@ -77,18 +77,29 @@ function Toolbar({
 
   return (
     <header>
-      <div className="brand">
-        <div className="brand-mark">
+      {/* The whole brand is the way back to the workspace chooser. A button, not
+          a div with a handler, so it is keyboard-focusable and announces itself.
+          Switching workspaces discards unsaved in-session state (snapshots, undo
+          history) exactly as the profile menu's own "back" action does, so the
+          title says so rather than surprising anyone. */}
+      <button
+        type="button"
+        className="brand"
+        onClick={onBackToProfiles}
+        title="Back to workspace chooser"
+        aria-label="Back to workspace chooser"
+      >
+        <span className="brand-mark">
           {/* Served at 96px for a 30px box so it stays sharp on hi-dpi screens.
               alt is empty on purpose: the product name sits right beside it, so
               a screen reader announcing the logo too would just be noise. */}
           <img src="/logo-96.png" alt="" width="96" height="96" draggable="false" />
-        </div>
-        <h1>
-          Network Drawing Builder
+        </span>
+        <span className="brand-text">
+          <strong>Network Drawing Builder</strong>
           <small>Industrial topology editor</small>
-        </h1>
-      </div>
+        </span>
+      </button>
 
       <div className="tools" ref={containerRef} {...magnifyProps}>
         <Group label="History" className="when-no-dock">

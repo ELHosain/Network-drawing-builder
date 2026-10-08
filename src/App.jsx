@@ -703,6 +703,7 @@ export default function App({
         onToggleLock={() => { setLocked((l) => !l); toast(!locked ? 'Layout locked' : 'Layout unlocked'); }}
         helpOpen={helpOpen}
         onToggleHelp={() => setHelpOpen((h) => !h)}
+        onBackToProfiles={onBackToProfiles}
         profileMenu={(
           <ProfileMenu
             profiles={profiles}

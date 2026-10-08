@@ -201,7 +201,7 @@ export default function LightRays({
       fadeDistance: { value: fadeDistance },
       saturation: { value: saturation },
       mousePos: { value: [0.5, 0.5] },
-      mouseInfluence: { value: reduced ? 0 : mouseInfluence },
+      mouseInfluence: { value: reduced ? mouseInfluence * 0.5 : mouseInfluence },
       noiseAmount: { value: noiseAmount },
       distortion: { value: distortion },
     };
@@ -226,7 +226,7 @@ export default function LightRays({
     const loop = (t) => {
       if (disposed) return;
       uniforms.iTime.value = t * 0.001;
-      if (followMouse && !reduced && mouseInfluence > 0) {
+      if (followMouse && mouseInfluence > 0) {
         const s = 0.95;
         smooth.x = smooth.x * s + mouseRef.current.x * (1 - s);
         smooth.y = smooth.y * s + mouseRef.current.y * (1 - s);
@@ -246,7 +246,7 @@ export default function LightRays({
     };
 
     window.addEventListener('resize', place);
-    if (followMouse && !reduced) window.addEventListener('mousemove', onMove);
+    if (followMouse) window.addEventListener('mousemove', onMove);
     place();
     frame = requestAnimationFrame(loop);
 

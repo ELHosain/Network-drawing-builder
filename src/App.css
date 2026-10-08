@@ -1736,16 +1736,44 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
 
 /* Two slow-drifting brand-coloured blooms. Behind everything, and never
    touching text contrast because it sits under a heavily blurred layer. */
+/* The blooms parallax against the pointer. The shift is applied to each
+   gradient's own centre rather than to a transform, because the slow drift
+   animation below already owns transform -- an animation always beats an
+   inline style, so a transform-based parallax would simply be ignored.
+   Each layer moves by a different amount and the violet moves the opposite
+   way, which is what sells it as depth rather than a flat slide. */
 .gate-glow {
   position: absolute; inset: -20%;
   z-index: -1; pointer-events: none;
   background:
-    radial-gradient(38% 42% at 22% 18%, rgba(0, 153, 153, .40), transparent 70%),
-    radial-gradient(34% 38% at 80% 72%, rgba(100, 30, 140, .34), transparent 70%),
-    radial-gradient(30% 34% at 62% 12%, rgba(0, 153, 153, .22), transparent 70%);
+    radial-gradient(38% 42% at calc(22% + var(--mx, 0px)) calc(18% + var(--my, 0px)),
+      rgba(0, 153, 153, .40), transparent 70%),
+    radial-gradient(34% 38% at calc(80% - var(--mx, 0px) * 0.7) calc(72% - var(--my, 0px) * 0.7),
+      rgba(100, 30, 140, .34), transparent 70%),
+    radial-gradient(30% 34% at calc(62% + var(--mx, 0px) * 1.4) calc(12% + var(--my, 0px) * 1.4),
+      rgba(0, 153, 153, .22), transparent 70%);
   filter: blur(40px);
   animation: gateDrift 22s ease-in-out infinite alternate;
 }
+
+/* A soft pool of petrol sitting directly under the cursor. This is the part
+   that reads immediately as "the background is following me" -- the parallax
+   above is felt more than seen. */
+.gate-spot {
+  position: absolute; inset: 0;
+  z-index: -1; pointer-events: none;
+  background: radial-gradient(
+    520px circle at var(--cx, 50%) var(--cy, 40%),
+    rgba(0, 153, 153, .20),
+    rgba(100, 30, 140, .10) 42%,
+    transparent 68%
+  );
+  opacity: 0;
+  animation: gateSpotIn .9s var(--ease) .3s forwards;
+}
+@keyframes gateSpotIn { to { opacity: 1; } }
+
+.gate.launching .gate-spot { opacity: 0; transition: opacity var(--launch, .7s) var(--ease); }
 @keyframes gateDrift {
   from { transform: translate3d(-2%, -1%, 0) scale(1); }
   to   { transform: translate3d(3%, 2%, 0) scale(1.1); }

@@ -64,6 +64,34 @@ export default function ProfileGate({
   // The launch in progress: which profile, and where its avatar sat on screen
   // when it was clicked. Null until a card is chosen.
   const [launch, setLaunch] = useState(null);
+
+  // Pointer position for the background, published to CSS on the gate element:
+  // --cx/--cy are the cursor itself (for the spotlight that sits under it) and
+  // --mx/--my are small parallax offsets the aurora layers drift by.
+  //
+  // Written straight to the element on an animation frame. This fires on every
+  // mousemove across the whole screen, and re-rendering React for a background
+  // light would be indefensible.
+  const gateRef = useRef(null);
+  const bgFrame = useRef(0);
+  const trackBackground = useCallback((e) => {
+    if (bgFrame.current) return;
+    const { clientX, clientY } = e;
+    bgFrame.current = requestAnimationFrame(() => {
+      bgFrame.current = 0;
+      const el = gateRef.current;
+      if (!el) return;
+      const nx = clientX / window.innerWidth;   // 0..1
+      const ny = clientY / window.innerHeight;
+      el.style.setProperty('--cx', `${nx * 100}%`);
+      el.style.setProperty('--cy', `${ny * 100}%`);
+      // Parallax: layers shift against the pointer, which reads as depth.
+      el.style.setProperty('--mx', `${(nx - 0.5) * 90}px`);
+      el.style.setProperty('--my', `${(ny - 0.5) * 70}px`);
+    });
+  }, []);
+
+  useEffect(() => () => { if (bgFrame.current) cancelAnimationFrame(bgFrame.current); }, []);
   const avatarRefs = useRef(new Map());
   const timerRef = useRef(0);
 
@@ -114,8 +142,14 @@ export default function ProfileGate({
   };
 
   return (
-    <div className={`gate${launch ? ' launching' : ''}`} style={{ '--launch': `${launchSeconds}s` }}>
+    <div
+      className={`gate${launch ? ' launching' : ''}`}
+      ref={gateRef}
+      onMouseMove={trackBackground}
+      style={{ '--launch': `${launchSeconds}s` }}
+    >
       <div className="gate-glow" aria-hidden="true" />
+      <div className="gate-spot" aria-hidden="true" />
       <Suspense fallback={null}>
         <LightRays
           raysOrigin="top-center"
@@ -125,7 +159,7 @@ export default function ProfileGate({
           lightSpread={1.1}
           rayLength={1.9}
           followMouse
-          mouseInfluence={0.12}
+          mouseInfluence={0.38}
           noiseAmount={0.03}
           distortion={0.05}
           saturation={0.95}

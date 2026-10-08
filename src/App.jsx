@@ -254,6 +254,40 @@ export default function App({
   }
   useEffect(() => () => resizeObsRef.current?.disconnect(), []);
 
+  // Zoom needs its own re-measure, for three reasons that stack up:
+  //
+  // #canvas animates its transform over 150ms, so for that whole time the DOM
+  // is scaled somewhere between the old zoom and the new one -- while the
+  // geometry above divides the measured rects by the FINAL proj.zoom. Every
+  // port therefore resolves to the wrong canvas coordinate mid-transition.
+  //
+  // The convergence effect cannot rescue it: it stops as soon as two
+  // consecutive measurements agree, and consecutive synchronous re-renders
+  // happen inside one animation frame, where the transform has not moved. It
+  // agrees instantly and never looks again.
+  //
+  // The ResizeObserver cannot either: it reports the untransformed layout box,
+  // which does not change when an ancestor is scaled, so zoom never fires it.
+  //
+  // So: re-measure every frame while the transition runs, and once more after
+  // it has certainly finished. Only while zooming -- this costs nothing at rest.
+  useEffect(() => {
+    let raf = 0;
+    let stopped = false;
+    const tick = () => {
+      if (stopped) return;
+      setGeomTick((t) => t + 1);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    const settle = setTimeout(() => {
+      stopped = true;
+      cancelAnimationFrame(raf);
+      setGeomTick((t) => t + 1);
+    }, 260);
+    return () => { stopped = true; cancelAnimationFrame(raf); clearTimeout(settle); };
+  }, [proj.zoom]);
+
   // ---- ghost (preview) wire while connecting ----
   // Throttled to one update per animation frame. A mouse can emit well over
   // 100 move events a second; without this, each one triggered its own React

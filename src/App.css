@@ -2263,7 +2263,15 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
   transition: opacity .3s var(--ease);
 }
 .gate-card:hover:not(:disabled)::after { opacity: 1; }
-.gate-card > * { position: relative; z-index: 1; }
+/* The surface lighting is pushed BEHIND the content instead of pushing the
+   content in front of it. The previous rule here set position:relative on every
+   direct child, which overrode position:absolute on the "Last used" badge and
+   the number hint -- both dropped into the flex column and stacked on top of
+   the avatar. Negative z-index on the two lighting layers achieves the same
+   result without touching how anything else is positioned. */
+.gate-card { isolation: isolate; }
+.gate-card::after,
+.gate-sheen { z-index: -1; }
 
 /* ---- avatar: a brand-gradient ring that spins up on hover ------------- */
 .gate-avatar { position: relative; }

@@ -13,17 +13,27 @@ async function renderCanvasElement(canvasEl, contentBounds, scale = 2) {
   const maxY = Math.max(1560, contentBounds.maxY + pad);
 
   const prevTransform = canvasEl.style.transform;
-  const prevTheme = document.documentElement.getAttribute('data-theme');
+  const prevTheme = canvasEl.getAttribute('data-theme');
 
   // html2canvas renders live <input> values unreliably (blurry/clipped), so
   // temporarily overlay a plain text node on top of each input carrying the
   // same value and style, then remove them after the snapshot.
-  // ORDER MATTERS. Force light mode FIRST, then read the computed styles.
-  // Reading them first was a real bug: in dark mode every label's computed
-  // colour is near-white, that near-white got baked into the overlay's inline
-  // style, and the snapshot then rendered it on the forced white background
-  // -- invisible device names in every export taken from the dark theme.
-  document.documentElement.setAttribute('data-theme', 'light');
+  // The light palette is applied to the CANVAS, not to the document.
+  //
+  // Setting it on <html> re-themed the entire interface for the length of the
+  // capture, so taking a snapshot in dark mode flashed the whole app white for
+  // a moment -- it looked like the editor was changing theme and back. The
+  // palette is declared with a plain [data-theme=light] attribute selector,
+  // not a :root one, so putting the attribute on the canvas redefines the
+  // tokens for that subtree alone. The drawing renders light and printable;
+  // the editor around it never changes.
+  //
+  // ORDER MATTERS. Apply it FIRST, then read the computed styles. Reading them
+  // first was a real bug: in dark mode every label's computed colour is
+  // near-white, that near-white got baked into the overlay's inline style, and
+  // the snapshot rendered it on the forced white background -- invisible device
+  // names in every export taken from the dark theme.
+  canvasEl.setAttribute('data-theme', 'light');
   canvasEl.style.transform = 'none';
   canvasEl.classList.add('exporting');
 
@@ -56,8 +66,8 @@ async function renderCanvasElement(canvasEl, contentBounds, scale = 2) {
   } finally {
     canvasEl.style.transform = prevTransform;
     canvasEl.classList.remove('exporting');
-    if (prevTheme) document.documentElement.setAttribute('data-theme', prevTheme);
-    else document.documentElement.removeAttribute('data-theme');
+    if (prevTheme) canvasEl.setAttribute('data-theme', prevTheme);
+    else canvasEl.removeAttribute('data-theme');
     overlays.forEach(({ inp, span }) => { span.remove(); inp.style.visibility = ''; });
   }
   return shot;

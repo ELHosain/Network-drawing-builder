@@ -2509,3 +2509,15 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
 /* The canvas is the one surface that gets continuously repainted during a
    drag. Isolating it stops those repaints leaking into the chrome around it. */
 #canvasWrap { contain: layout paint; }
+
+/* The export palette is now scoped to #canvas rather than to <html>, so the
+   editor no longer flashes light while a snapshot renders. One consequence:
+   <html> keeps data-theme="dark", so any `[data-theme="dark"] .something` rule
+   still matches inside the canvas and would override the light tokens it just
+   inherited. These are the ones that reach the drawing, pinned for export. */
+#canvas.exporting .device-node input.ip { color: #1457a0 !important; }
+
+#canvas.exporting .device-node {
+  --node-frame: #b4bcc4 !important;
+  --node-wash: transparent !important;
+}

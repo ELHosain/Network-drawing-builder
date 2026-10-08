@@ -440,19 +440,10 @@ footer .statusbar { color: var(--sub); font-weight: 500; }
   #hint { display: none; }
 }
 
-@media (max-width: 760px) {
-  .snap-tray { width: 190px; right: 8px; bottom: 8px; }
-  #main { flex-direction: column; }
-  #palette {
-    width: 100%; height: auto; max-height: 128px; border-right: none; border-bottom: 1px solid var(--rule);
-    display: flex; flex-direction: row; flex-wrap: nowrap; overflow-x: auto; align-items: flex-start; gap: 6px;
-  }
-  #palette h2, .search-box { display: none; }
-  #palette > div#customList, #palette > .pitem { flex-shrink: 0; }
-  .pitem { width: 72px; margin-bottom: 0; }
-  #hint { display: none; }
-  header h1 small { display: none; }
-}
+/* Small-screen layout is handled in the consolidated responsive section at
+   the end of this file. The old horizontal-strip palette rule lived here and
+   was written for the previous .pitem markup; it fought the spring-sized
+   PaletteTile components and has been removed. */
 
 /* ===== Quick snapshot roll ============================================ */
 /* Docked to the canvas viewport (not the page) so it floats over the
@@ -2147,4 +2138,105 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
    and without the blur, which is the expensive, disorienting part. */
 @media (prefers-reduced-motion: reduce) {
   @keyframes gateDepart { to { opacity: 0; transform: scale(1.04); } }
+}
+
+/* ======================================================================
+   RESPONSIVE — consolidated
+   ----------------------------------------------------------------------
+   Target: large desktop, laptop and tablet (768px and up). Phones are out of
+   scope: wiring a 2400x1600 canvas by fingertip is not a thing this tool can
+   do well, so below 760px it degrades to a usable-but-not-ideal fallback
+   rather than pretending otherwise.
+
+   Placed last on purpose: later rules win, so this overrides the base layout
+   without !important and without depending on where each base rule sits.
+   ====================================================================== */
+
+/* ---- Laptop (<=1200px): reclaim horizontal space ---------------------- */
+@media (max-width: 1200px) {
+  /* The device library is a quarter of a laptop's width at 196px. */
+  #palette { width: 168px; }
+  .pitem { width: 104px; }
+
+  /* Floating panels slim down so the canvas keeps the middle. */
+  .check-panel { width: 288px; }
+  .snap-tray { width: 212px; }
+}
+
+/* ---- Tablet (<=1000px): panels stop covering the canvas ---------------- */
+@media (max-width: 1000px) {
+  /* The check panel is already open/closed by the toolbar's Check button, so
+     it does not need a hover-to-expand here -- that would clip its content
+     while open. Just narrow it so it covers less of the canvas. */
+  .check-panel { width: 264px; }
+
+  #palette { width: 150px; }
+  .pitem { width: 96px; }
+
+  /* Title/subtitle in the masthead is the first thing that can go. */
+  header h1 small { display: none; }
+}
+
+/* ---- Tablet portrait (<=820px): palette becomes a top strip ----------- */
+@media (max-width: 820px) {
+  #main { flex-direction: column; }
+
+  /* A horizontal rail across the top. The PaletteTile components keep their
+     own width; the container just scrolls sideways and does not grow them. */
+  #palette {
+    width: 100%;
+    max-height: 132px;
+    border-right: none;
+    border-bottom: 1px solid var(--glass-edge);
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  #palette .search-box { display: none; }
+  #palette h2 {
+    writing-mode: vertical-rl;
+    margin: 0 2px; padding: 0;
+    font-size: 8px;
+  }
+  #customList { flex-direction: row; }
+  .gate-grid { gap: 14px; }
+
+  /* The dock would collide with the palette rail and the trays here. */
+  .dock { display: none; }
+  .tgroup.when-no-dock { display: flex; }
+}
+
+/* ---- Touch devices: bigger hit targets, any screen size --------------- */
+/* Keyed on a coarse pointer, not on width: a narrow mouse window should NOT
+   get finger-sized controls, and a large touchscreen SHOULD. This is what
+   actually makes fingers work, independent of the layout breakpoints above. */
+@media (pointer: coarse) {
+  /* Ports: the primary wiring target. 23x19 is a mouse size; a fingertip is
+     ~44px. These go up without changing the wire geometry, which reads each
+     port's live rect rather than any fixed number. */
+  .portbox { min-width: 32px; min-height: 28px; font-size: 11px; }
+  .ports-row-flow { gap: 8px; }
+  .pcol { gap: 10px; }
+
+  /* The +/- port steppers and node header icons. */
+  .portbtn { width: 30px; height: 30px; font-size: 15px; }
+  .node-header .icobtn { width: 30px; height: 30px; font-size: 16px; }
+  .pitem .rm { width: 26px; height: 26px; font-size: 15px; }
+  .resize-handle { width: 26px; height: 26px; }
+
+  /* Toolbar controls: more generous padding so the row is tappable. */
+  .tools button { padding: 9px 12px; }
+  #zoomCtl button { padding: 9px 10px; }
+
+  /* Hover-reveal controls never un-reveal on touch -- there is no hover -- so
+     make the ones that matter permanently visible instead of appearing only
+     on a hover that will never come. */
+  .node-header .icobtn,
+  .resize-handle,
+  .pitem .rm,
+  .portctl,
+  .gate-actions { opacity: 1; }
+
+  /* The magnifier needs a hovering pointer; it does nothing useful on touch
+     and the permanent scale-up it can leave behind is just confusing. */
+  [data-magnify] { transform: none !important; }
 }

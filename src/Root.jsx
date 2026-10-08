@@ -77,11 +77,20 @@ export default function Root() {
     openProfile(p.id);
   }, [profiles, openProfile]);
 
-  const renameProfile = useCallback((id, name) => {
-    const next = profiles.map((p) => (p.id === id ? { ...p, name } : p));
+  // Takes a patch rather than just a name, so the same path handles a rename, a
+  // new photo, or both at once.
+  const updateProfile = useCallback((id, patch) => {
+    const next = profiles.map((p) => (p.id === id ? { ...p, ...patch } : p));
     setProfiles(next);
-    saveProfiles(next);
+    if (!saveProfiles(next)) {
+      // Avatars are the only thing here big enough to hit the storage ceiling,
+      // and a silent failure would look like the photo simply not sticking.
+      // eslint-disable-next-line no-alert
+      window.alert('Could not save — this browser\'s storage is full. Try a smaller photo, or remove a workspace you no longer need.');
+    }
   }, [profiles]);
+
+  const renameProfile = useCallback((id, name) => updateProfile(id, { name }), [updateProfile]);
 
   const deleteProfile = useCallback((id) => {
     if (profiles.length <= 1) return;
@@ -100,7 +109,7 @@ export default function Root() {
         lastUsedId={lastUsedId}
         onSelect={openProfile}
         onCreate={addProfile}
-        onRename={renameProfile}
+        onUpdate={updateProfile}
         onDelete={deleteProfile}
       />
     );

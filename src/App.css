@@ -2240,3 +2240,102 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
      and the permanent scale-up it can leave behind is just confusing. */
   [data-magnify] { transform: none !important; }
 }
+
+/* ======================================================================
+   Workspace card — pointer-lit glass
+   ----------------------------------------------------------------------
+   GateCard publishes the cursor's position inside the card as --px/--py, so
+   the light can follow it. None of this uses a transform: the cards animate
+   real width and height, and a scale here would soften the labels again.
+   ====================================================================== */
+
+/* A highlight that tracks the cursor across the pane. Sits above the glass but
+   below the content, so it lights the surface rather than washing out text. */
+.gate-card::after {
+  content: '';
+  position: absolute; inset: 0; border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    circle 150px at var(--px, 50%) var(--py, 0%),
+    var(--accent-ring), transparent 70%
+  );
+  opacity: 0;
+  transition: opacity .3s var(--ease);
+}
+.gate-card:hover:not(:disabled)::after { opacity: 1; }
+.gate-card > * { position: relative; z-index: 1; }
+
+/* ---- avatar: a brand-gradient ring that spins up on hover ------------- */
+.gate-avatar { position: relative; }
+.gate-avatar::before {
+  content: '';
+  position: absolute; inset: -5px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    var(--accent), #8b4db0, var(--accent), #8b4db0, var(--accent)
+  );
+  /* Ring, not disc: the mask punches the middle out so the avatar shows. */
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 0);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 0);
+  opacity: 0;
+  transition: opacity .3s var(--ease);
+}
+.gate-card:hover:not(:disabled) .gate-avatar::before {
+  opacity: 1;
+  animation: avatarRing 2.6s linear infinite;
+}
+@keyframes avatarRing { to { transform: rotate(1turn); } }
+
+/* ---- the text lifts and warms as the card comes forward -------------- */
+.gate-name,
+.gate-stats,
+.gate-meta { transition: color .25s var(--ease), opacity .25s var(--ease); }
+
+.gate-card:hover:not(:disabled) .gate-name { color: var(--accent); }
+.gate-card:hover:not(:disabled) .gate-meta { opacity: 1; color: var(--sub); }
+
+/* ---- the chosen card's ring locks to solid petrol -------------------- */
+.gate-card.chosen .gate-avatar::before {
+  opacity: 1;
+  animation: avatarRing .7s linear infinite;
+}
+
+/* The ring is the only thing here that loops, so it is the only thing that
+   stops. The highlight, the colour shifts and the card growth all remain,
+   because they are transitions that settle rather than motion that repeats. */
+@media (prefers-reduced-motion: reduce) {
+  .gate-card:hover:not(:disabled) .gate-avatar::before,
+  .gate-card.chosen .gate-avatar::before { animation: none; }
+}
+
+/* ======================================================================
+   Edit-workspace dialog: the avatar is the control
+   ====================================================================== */
+.ap-avatar-btn {
+  position: relative;
+  padding: 0; border: none; background: none; border-radius: 50%;
+  cursor: pointer; overflow: hidden;
+  display: block;
+}
+.ap-avatar-btn:hover:not(:disabled) { background: none; box-shadow: none; }
+.ap-avatar-btn .gate-avatar { width: 76px; margin-bottom: 0; }
+
+.ap-avatar-overlay {
+  position: absolute; inset: 0; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, .58);
+  color: #fff; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .06em;
+  opacity: 0;
+  transition: opacity .18s var(--ease);
+}
+.ap-avatar-btn:hover .ap-avatar-overlay,
+.ap-avatar-btn:focus-visible .ap-avatar-overlay { opacity: 1; }
+
+/* The avatar can no longer clip its own box: the gradient ring is drawn just
+   outside it, and overflow:hidden was cutting the whole thing away. The image
+   clips itself with its own radius instead, which is all the clipping that was
+   ever needed. */
+.gate-avatar { overflow: visible; }
+.gate-avatar img { border-radius: 50%; }

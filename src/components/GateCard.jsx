@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion, useSpring, useTransform } from 'framer-motion';
 
 // A workspace card that magnifies with real width and height, the way the dock
@@ -35,6 +35,34 @@ export default function GateCard({
   const width = useSpring(useTransform(distanceFromPointer, range, [CARD.w, CARD.magW, CARD.w]), spring);
   const height = useSpring(useTransform(distanceFromPointer, range, [CARD.h, CARD.magH, CARD.h]), spring);
 
+  // Feeds the card's own pointer position to CSS as a percentage, so a
+  // highlight can follow the cursor across the glass. Written straight to the
+  // element on an animation frame rather than through React state: this fires
+  // on every mousemove, and a re-render per frame for a lighting effect would
+  // be absurd.
+  const frame = useRef(0);
+  const trackPointer = (e) => {
+    if (frame.current) return;
+    const { clientX, clientY } = e;
+    frame.current = requestAnimationFrame(() => {
+      frame.current = 0;
+      const el = ref.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      el.style.setProperty('--px', `${((clientX - r.left) / r.width) * 100}%`);
+      el.style.setProperty('--py', `${((clientY - r.top) / r.height) * 100}%`);
+    });
+  };
+
+  const clearPointer = () => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.removeProperty('--px');
+    el.style.removeProperty('--py');
+  };
+
+  useEffect(() => () => { if (frame.current) cancelAnimationFrame(frame.current); }, []);
+
   return (
     <motion.button
       ref={ref}
@@ -42,6 +70,8 @@ export default function GateCard({
       className={`gate-card ${className}`.trim()}
       style={{ width, height }}
       onClick={onClick}
+      onMouseMove={trackPointer}
+      onMouseLeave={clearPointer}
       disabled={disabled}
     >
       {children}

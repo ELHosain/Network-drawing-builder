@@ -40,9 +40,10 @@ function Avatar({ profile, innerRef }) {
 // rule paints a full-width glass bar with the brand gradient along its bottom,
 // and the element selector was catching this one too.
 export default function ProfileGate({
-  profiles, lastUsedId, onSelect, onCreate, onRename, onDelete,
+  profiles, lastUsedId, onSelect, onCreate, onUpdate, onDelete,
 }) {
-  const [adding, setAdding] = useState(false);
+  // null = closed, 'new' = creating, otherwise the profile being edited.
+  const [editor, setEditor] = useState(null);
   // One pointer position shared by every card, so a pointer move costs a single
   // motion-value write rather than a React render of the whole row.
   const mouseX = useMotionValue(Number.POSITIVE_INFINITY);
@@ -84,13 +85,13 @@ export default function ProfileGate({
 
   useEffect(() => {
     const onKey = (e) => {
-      if (adding || launch) return;
+      if (editor || launch) return;
       const n = parseInt(e.key, 10);
       if (n >= 1 && n <= Math.min(9, profiles.length)) choose(profiles[n - 1].id);
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [profiles, adding, launch, choose]);
+  }, [profiles, editor, launch, choose]);
 
   const launchSeconds = (reduced ? LAUNCH_MS_REDUCED : LAUNCH_MS) / 1000;
 
@@ -176,12 +177,8 @@ export default function ProfileGate({
                     old bottom-centred placement did with the meta line. */}
                 <span className="gate-actions">
                   <button
-                    title="Rename this workspace"
-                    onClick={() => {
-                      // eslint-disable-next-line no-alert
-                      const name = window.prompt('Rename this workspace', p.name);
-                      if (name && name.trim()) onRename(p.id, name.trim());
-                    }}
+                    title="Edit name and photo"
+                    onClick={() => setEditor(p)}
                   >
                     &#9998;
                   </button>
@@ -210,7 +207,7 @@ export default function ProfileGate({
               mouseX={mouseX}
               reduced={reduced}
               className="add"
-              onClick={() => setAdding(true)}
+              onClick={() => setEditor('new')}
               disabled={launch !== null}
             >
               <span className="gate-avatar add-mark">+</span>
@@ -262,9 +259,15 @@ export default function ProfileGate({
       </AnimatePresence>
 
       <AddProfileDialog
-        open={adding}
-        onCancel={() => setAdding(false)}
-        onCreate={(name, avatar) => { setAdding(false); onCreate(name, avatar); }}
+        open={editor !== null}
+        profile={editor === 'new' ? null : editor}
+        onCancel={() => setEditor(null)}
+        onSubmit={(name, avatar) => {
+          const target = editor;
+          setEditor(null);
+          if (target === 'new') onCreate(name, avatar);
+          else onUpdate(target.id, { name, avatar });
+        }}
       />
     </div>
   );

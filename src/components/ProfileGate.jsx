@@ -6,7 +6,13 @@ import AddProfileDialog from './AddProfileDialog.jsx';
 
 // How long the launch runs before the editor takes over. The flight lands just
 // before the handover, so the editor appears to come out of it.
+//
+// A reduced-motion preference SHORTENS this rather than removing the sequence.
+// Skipping it outright meant anyone with "animation effects" turned off in
+// Windows got no transition at all -- the selection simply cut to the editor --
+// and this animation was asked for specifically. Less motion, not none.
 const LAUNCH_MS = 700;
+const LAUNCH_MS_REDUCED = 400;
 
 function AvatarFace({ profile }) {
   return profile.avatar
@@ -71,7 +77,7 @@ export default function ProfileGate({
     if (!profile) return;
     const el = avatarRefs.current.get(id);
     setLaunch({ id, profile, rect: el ? el.getBoundingClientRect() : null });
-    timerRef.current = setTimeout(() => onSelect(id), reduced ? 120 : LAUNCH_MS);
+    timerRef.current = setTimeout(() => onSelect(id), reduced ? LAUNCH_MS_REDUCED : LAUNCH_MS);
   }, [launch, profiles, onSelect, reduced]);
 
   useEffect(() => () => clearTimeout(timerRef.current), []);
@@ -85,6 +91,8 @@ export default function ProfileGate({
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [profiles, adding, launch, choose]);
+
+  const launchSeconds = (reduced ? LAUNCH_MS_REDUCED : LAUNCH_MS) / 1000;
 
   // Where the flying avatar ends up: dead centre, grown past the viewport, so
   // it reads as the workspace opening out rather than an icon drifting away.
@@ -100,7 +108,7 @@ export default function ProfileGate({
   };
 
   return (
-    <div className={`gate${launch ? ' launching' : ''}`}>
+    <div className={`gate${launch ? ' launching' : ''}`} style={{ '--launch': `${launchSeconds}s` }}>
       <div className="gate-glow" aria-hidden="true" />
 
       <div className="gate-inner">
@@ -224,7 +232,7 @@ export default function ProfileGate({
           same reason the cards are -- a scaled bitmap would soften the face or
           the initials exactly when they are largest. */}
       <AnimatePresence>
-        {launch && launch.rect && !reduced && (
+        {launch && launch.rect && (
           <motion.div
             key="flight"
             className="gate-flight"
@@ -240,11 +248,11 @@ export default function ProfileGate({
             }}
             animate={{ ...flightTarget(), opacity: 0 }}
             transition={{
-              duration: LAUNCH_MS / 1000,
+              duration: launchSeconds,
               ease: [0.55, 0, 0.25, 1],
               opacity: {
-                delay: (LAUNCH_MS / 1000) * 0.45,
-                duration: (LAUNCH_MS / 1000) * 0.55,
+                delay: launchSeconds * 0.45,
+                duration: launchSeconds * 0.55,
               },
             }}
           >

@@ -133,11 +133,29 @@ body {
 /* Respect a reduced-motion preference everywhere rather than per-rule: this
    app leans on a lot of small transitions, and they are decoration, not
    information. */
+/* Deliberately NOT the usual universal `!important` reset.
+ *
+ * That snippet sets animation-duration and transition-duration to .001ms on
+ * every element, and because it is a universal selector with !important it
+ * cannot be overridden by anything. It silently killed every CSS-driven
+ * effect in this app -- the toolbar and palette magnifiers, the workspace
+ * launch sequence -- while the framer-motion ones carried on, because those
+ * animate inline styles from JS and never touch CSS. The result was not a
+ * calmer app; it was one where half the interface looked broken and there was
+ * no way to tell why.
+ *
+ * Only animation that repeats forever is stopped here. Components that own a
+ * one-shot transition shorten or simplify it themselves, close to the code
+ * that knows what the motion is for.
+ */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: .001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: .001ms !important;
+  .portbox.active,
+  .save-status.error .save-dot,
+  .ghostwire,
+  .gate-glow,
+  .gate-logo,
+  .gate-title {
+    animation: none !important;
   }
 }
 

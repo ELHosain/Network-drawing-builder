@@ -1619,8 +1619,10 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
    by the one below it, which paints later in DOM order. */
 #palette [data-magnify]:hover { position: relative; z-index: 2; }
 
+/* Shortened, not removed: pinning --mag to 1 made the toolbar completely inert
+   for anyone with animation effects disabled in Windows. */
 @media (prefers-reduced-motion: reduce) {
-  [data-magnify] { transition: none; --mag: 1 !important; }
+  [data-magnify] { transition-duration: .06s; }
 }
 
 /* z-index only applies to a positioned element, and the hook raises the
@@ -2003,10 +2005,11 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
 }
 
 /* The stage tilt, the sheen and the drifting aurora are all decoration. */
+/* Only the endlessly looping ambience stops -- the drifting aurora, the
+   floating logo, the sweeping heading. One-shot entrances are kept: they are
+   brief, they end, and removing them left the screen feeling broken. */
 @media (prefers-reduced-motion: reduce) {
-  .gate, .gate-glow, .gate-head, .gate-title, .gate-note, .gate-foot,
-  .gate-grid > li, .gate-logo { animation: none !important; }
-  .gate-card:hover:not(:disabled) { transform: translateY(-4px); }
+  .gate-glow, .gate-logo, .gate-title { animation: none !important; }
   .gate-sheen { display: none; }
 }
 
@@ -2062,7 +2065,7 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
 /* The whole chooser falls back and softens, so the flying avatar is the only
    thing moving toward the viewer. */
 .gate.launching .gate-inner {
-  animation: gateDepart .7s var(--ease) forwards;
+  animation: gateDepart var(--launch, .7s) var(--ease) forwards;
   pointer-events: none;
 }
 @keyframes gateDepart {
@@ -2070,18 +2073,18 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
 }
 
 /* The ground darkens and pushes back under it. */
-.gate.launching { animation: gateDim .7s var(--ease) forwards; }
+.gate.launching { animation: gateDim var(--launch, .7s) var(--ease) forwards; }
 @keyframes gateDim { to { background-color: #05090b; } }
 
 .gate.launching .gate-glow {
-  animation: gateGlowOut .7s var(--ease) forwards;
+  animation: gateGlowOut var(--launch, .7s) var(--ease) forwards;
 }
 @keyframes gateGlowOut { to { opacity: .25; transform: scale(1.3); filter: blur(70px); } }
 
 /* Unchosen cards drop away first, which is what makes the remaining one read
    as selected before it even starts moving. */
 .gate-grid > li.dimmed {
-  animation: gateDrop .34s var(--ease) forwards;
+  animation: gateDrop calc(var(--launch, .7s) * .48) var(--ease) forwards;
 }
 @keyframes gateDrop { to { opacity: 0; transform: translateY(10px) scale(.94); } }
 
@@ -2140,12 +2143,8 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
 /* The editor must never carry the veil into an export. */
 #canvas.exporting ~ .app-arrive, .app-arrive { pointer-events: none; }
 
+/* The launch still plays, just shorter (the component drops --launch to .4s)
+   and without the blur, which is the expensive, disorienting part. */
 @media (prefers-reduced-motion: reduce) {
-  .gate.launching .gate-inner,
-  .gate.launching,
-  .gate.launching .gate-glow,
-  .gate-grid > li.dimmed,
-  .app-arrive,
-  #app { animation: none !important; }
-  .app-arrive { display: none; }
+  @keyframes gateDepart { to { opacity: 0; transform: scale(1.04); } }
 }

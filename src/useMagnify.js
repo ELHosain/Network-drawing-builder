@@ -89,25 +89,14 @@ export function useMagnify({
     schedule();
   }, [schedule]);
 
-  // The effect is decoration, so it is switched off entirely when the system
-  // asks for reduced motion -- unlike the dock, nothing here is an affordance
-  // that would be lost.
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (!mq.matches) return undefined;
-    const root = containerRef.current;
-    root?.querySelectorAll(selector).forEach(clear);
-    pointer.current = null;
-    return undefined;
-  }, [selector]);
-
   useEffect(() => () => { if (frame.current) cancelAnimationFrame(frame.current); }, []);
 
-  const reduced = typeof window !== 'undefined'
-    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
+  // The pointer is always tracked. A reduced-motion preference shortens the
+  // transition in CSS instead of removing the effect: switching it off here
+  // left the toolbar completely inert for anyone with animation effects
+  // disabled in Windows, with no indication why.
   return {
     containerRef,
-    magnifyProps: reduced ? {} : { onMouseMove: onPointerMove, onMouseLeave: onPointerLeave },
+    magnifyProps: { onMouseMove: onPointerMove, onMouseLeave: onPointerLeave },
   };
 }

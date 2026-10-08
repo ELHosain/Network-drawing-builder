@@ -1762,53 +1762,49 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
   margin-bottom: 34px;
   animation: gateRise .5s var(--ease) both;
 }
-/* The logo gets a premium treatment: bigger, floating, with a slow brand
-   gradient ring orbiting it and a soft colour glow pooling behind. The ring
-   and glow sit in the wrapper so the float animation on the logo itself does
-   not drag them around with it. */
+/* The logo is a background-free mark (logo-mark.png), floated as a 3D object
+   rather than sat in a tile. No box, no border, no ring: the icon itself is the
+   logo. Depth comes from stacked drop-shadows under it and a gentle tilt-and-
+   bob that catches the eye without spinning. A soft brand glow pools behind. */
 .gate-logo-wrap {
   position: relative;
-  width: 86px; height: 86px;
-  margin-bottom: 16px;
+  width: 112px; height: 112px;
+  margin-bottom: 14px;
   display: flex; align-items: center; justify-content: center;
+  perspective: 600px;
 }
 
 .gate-logo {
   position: relative; z-index: 2;
-  width: 78px; height: 78px; border-radius: 20px;
-  box-shadow:
-    0 14px 34px -10px rgba(0, 0, 0, .6),
-    inset 0 1px 0 rgba(255, 255, 255, .12);
-  animation: gateLogo 5s ease-in-out infinite alternate;
+  width: 104px; height: 104px;
+  /* Layered shadows read as the object standing off the surface: a tight
+     contact shadow, a wide soft one, and a faint brand-coloured cast. */
+  filter:
+    drop-shadow(0 6px 10px rgba(0, 0, 0, .45))
+    drop-shadow(0 16px 26px rgba(0, 0, 0, .4))
+    drop-shadow(0 4px 20px rgba(0, 153, 153, .35));
+  transform-style: preserve-3d;
+  animation: gateLogo3d 6s ease-in-out infinite;
 }
-@keyframes gateLogo {
-  from { transform: translateY(0); }
-  to   { transform: translateY(-6px); }
+/* A slow bob with a small 3D tilt, so the mark turns a few degrees as it
+   rises -- enough to read as a solid object, not a sticker. */
+@keyframes gateLogo3d {
+  0%   { transform: translateY(0)    rotateX(0deg)   rotateY(-7deg); }
+  50%  { transform: translateY(-9px) rotateX(5deg)   rotateY(7deg); }
+  100% { transform: translateY(0)    rotateX(0deg)   rotateY(-7deg); }
 }
 
-/* A conic brand-gradient ring, masked to a thin band, rotating slowly. */
-.gate-logo-ring {
-  position: absolute; inset: -4px; z-index: 1;
-  border-radius: 24px;
-  background: conic-gradient(from 0deg, var(--accent), #8b4db0, var(--accent), #8b4db0, var(--accent));
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
-  opacity: .85;
-  animation: gateLogoRing 7s linear infinite;
-}
-@keyframes gateLogoRing { to { transform: rotate(1turn); } }
-
-/* A soft pool of brand colour behind the whole thing. */
+/* A soft pool of brand colour behind the floating mark. */
 .gate-logo-glow {
-  position: absolute; inset: -24px; z-index: 0;
+  position: absolute; inset: -10px; z-index: 0;
   border-radius: 50%;
-  background: radial-gradient(circle, var(--accent-ring), transparent 68%);
-  filter: blur(8px);
+  background: radial-gradient(circle, var(--accent-ring), transparent 66%);
+  filter: blur(10px);
   animation: gateLogoGlow 4s ease-in-out infinite alternate;
 }
 @keyframes gateLogoGlow {
-  from { opacity: .7; transform: scale(.92); }
-  to   { opacity: 1; transform: scale(1.08); }
+  from { opacity: .55; transform: scale(.9); }
+  to   { opacity: .9;  transform: scale(1.1); }
 }
 
 .gate-brand {
@@ -2049,7 +2045,7 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
    floating logo, the sweeping heading. One-shot entrances are kept: they are
    brief, they end, and removing them left the screen feeling broken. */
 @media (prefers-reduced-motion: reduce) {
-  .gate-glow, .gate-logo, .gate-logo-ring, .gate-logo-glow, .gate-title { animation: none !important; }
+  .gate-glow, .gate-logo, .gate-logo-glow, .gate-title { animation: none !important; }
   .gate-sheen { display: none; }
 }
 

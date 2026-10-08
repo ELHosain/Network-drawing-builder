@@ -37,7 +37,9 @@ export function useSnapshots({ canvasRef, getContentBounds, toast, getStats }) {
     if (busy.current || !canvasRef.current) return;
     busy.current = true;
     setFlashing(true);
-    setTimeout(() => setFlashing(false), 260);
+    // Must outlast the shutter animation in CSS (420ms), or the element is
+    // unmounted mid-pulse and the frame vanishes instead of fading.
+    setTimeout(() => setFlashing(false), 460);
     try {
       const { captureSnapshot } = await loadExporters();
       const shot = await captureSnapshot(canvasRef.current, getContentBounds());

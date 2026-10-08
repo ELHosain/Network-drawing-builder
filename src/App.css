@@ -517,11 +517,27 @@ footer .statusbar { color: var(--sub); font-weight: 500; }
 /* A single white frame over the drawing is the shutter feedback: it reads as
    "captured" instantly, where a toast alone arrives after the render and
    leaves you unsure whether the key registered. */
+/* A petrol frame that pulses in from the edges, not a white wash over the
+   whole screen. The full-screen flash read as the app glitching rather than as
+   a shutter firing -- it was the brightest thing in a dark editor, and it
+   covered the very drawing it was confirming. This draws attention to the
+   boundary of what was captured instead, which is also more informative. */
 #snapFlash {
-  position: absolute; inset: 0; background: #fff; pointer-events: none; z-index: 40;
-  animation: shutter .26s var(--ease) forwards;
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 40;
+  border: 2px solid var(--accent);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, .25),
+    inset 0 0 60px -14px var(--accent),
+    0 0 40px -12px var(--accent);
+  border-radius: 2px;
+  animation: shutter .42s var(--ease) forwards;
 }
-@keyframes shutter { from { opacity: .55; } to { opacity: 0; } }
+@keyframes shutter {
+  0%   { opacity: 0;   transform: scale(1.012); }
+  22%  { opacity: 1;   transform: scale(1); }
+  100% { opacity: 0;   transform: scale(1); }
+}
 
 /* The tray is editor chrome, never part of the drawing. */
 #canvas.exporting .snap-tray, #canvas.exporting #snapFlash { display: none !important; }

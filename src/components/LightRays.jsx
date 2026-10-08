@@ -174,7 +174,11 @@ export default function LightRays({
     const smooth = { x: 0.5, y: 0.5 };
 
     try {
-      renderer = new Renderer({ dpr: Math.min(window.devicePixelRatio, 2), alpha: true });
+      // Capped at 1.25 rather than 2. This shader runs per pixel over the whole
+      // viewport every frame, so its cost is pure fill rate -- at dpr 2 that is
+      // 2.5x the pixels of 1.25 for an effect that is soft, blurred light with
+      // no edges to alias. Cheapest large win available here.
+      renderer = new Renderer({ dpr: Math.min(window.devicePixelRatio, 1.25), alpha: true });
     } catch (e) {
       // No WebGL, or the context was refused. The CSS aurora underneath stands
       // in on its own; a background flourish must not break the screen.

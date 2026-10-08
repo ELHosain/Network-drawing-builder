@@ -1760,14 +1760,24 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
    that reads immediately as "the background is following me" -- the parallax
    above is felt more than seen. */
 .gate-spot {
-  position: absolute; inset: 0;
+  /* A fixed-size disc MOVED with a transform, not a full-screen gradient
+     repositioned by repainting it. Changing a gradient's centre forces the
+     browser to repaint the whole viewport every frame the pointer moves;
+     translating a layer is handled by the compositor and costs essentially
+     nothing. Same look, a fraction of the work. */
+  position: absolute;
+  top: 0; left: 0;
+  width: 900px; height: 900px;
+  margin: -450px 0 0 -450px;
   z-index: -1; pointer-events: none;
   background: radial-gradient(
-    520px circle at var(--cx, 50%) var(--cy, 40%),
+    circle closest-side,
     rgba(0, 153, 153, .20),
     rgba(100, 30, 140, .10) 42%,
-    transparent 68%
+    transparent 70%
   );
+  transform: translate3d(var(--spotx, 50vw), var(--spoty, 40vh), 0);
+  will-change: transform;
   opacity: 0;
   animation: gateSpotIn .9s var(--ease) .3s forwards;
 }
@@ -2449,3 +2459,37 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
      stops the fade-in from being one more thing moving at load. */
   .light-rays { animation: none; opacity: .7; }
 }
+
+/* ======================================================================
+   PERFORMANCE
+   ----------------------------------------------------------------------
+   The palette tiles, dock items and chooser cards animate real width and
+   height -- deliberately, because a transform would resample their text and
+   we fixed that blur already. The cost is a layout pass per frame.
+
+   contain:layout confines that pass to the element's own subtree instead of
+   letting it invalidate the whole document. Size containment is NOT used:
+   these elements are sized from outside, so containing size would break them.
+   Paint containment is not used either -- it clips, and the palette's remove
+   button and the chooser's badges sit deliberately outside their boxes.
+   ====================================================================== */
+.pitem,
+.dock-item,
+.gate-card {
+  contain: layout;
+}
+
+/* These are the properties actually being animated, so this is what the
+   compositor should be told to expect -- not `transform`, which would promote
+   a layer that never changes and waste memory. */
+.pitem,
+.dock-item,
+.gate-card { will-change: width, height; }
+
+/* Once a card is being launched its size is fixed again; holding the hint open
+   would keep a layer alive for nothing. */
+.gate.launching .gate-card { will-change: auto; }
+
+/* The canvas is the one surface that gets continuously repainted during a
+   drag. Isolating it stops those repaints leaking into the chrome around it. */
+#canvasWrap { contain: layout paint; }

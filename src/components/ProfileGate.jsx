@@ -83,8 +83,11 @@ export default function ProfileGate({
       if (!el) return;
       const nx = clientX / window.innerWidth;   // 0..1
       const ny = clientY / window.innerHeight;
-      el.style.setProperty('--cx', `${nx * 100}%`);
-      el.style.setProperty('--cy', `${ny * 100}%`);
+      // Pixels, not percentages: the spotlight is translated now rather than
+      // having its gradient repositioned, so it needs a length the compositor
+      // can apply directly.
+      el.style.setProperty('--spotx', `${clientX}px`);
+      el.style.setProperty('--spoty', `${clientY}px`);
       // Parallax: layers shift against the pointer, which reads as depth.
       el.style.setProperty('--mx', `${(nx - 0.5) * 90}px`);
       el.style.setProperty('--my', `${(ny - 0.5) * 70}px`);

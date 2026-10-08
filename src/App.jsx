@@ -237,7 +237,14 @@ export default function App({
   // comparison is on the path strings themselves, so there is no way for it to
   // oscillate.
   const paintedPathsRef = useRef('');
+  // True only while a device is actually being dragged. A drag already
+  // re-renders on every pointer move with freshly moved DOM, so the convergence
+  // pass has nothing left to correct -- it would just double the render count
+  // on the one path where frames matter most. Set from the move handler rather
+  // than from state, so flipping it costs no render of its own.
+  const draggingRef = useRef(false);
   useLayoutEffect(() => {
+    if (draggingRef.current) return;
     const signature = wirePaths.map((w) => w.d).join('|');
     if (signature !== paintedPathsRef.current) {
       paintedPathsRef.current = signature;
@@ -336,8 +343,17 @@ export default function App({
   }, [toast]);
 
   // ---- node drag ----
-  const handleNodeMove = useCallback((id, x, y) => projRef.current.moveNodeLive(id, x, y), []);
-  const handleNodeMoveEnd = useCallback((id) => projRef.current.finishMove(id), []);
+  const handleNodeMove = useCallback((id, x, y) => {
+    draggingRef.current = true;
+    projRef.current.moveNodeLive(id, x, y);
+  }, []);
+  const handleNodeMoveEnd = useCallback((id) => {
+    draggingRef.current = false;
+    projRef.current.finishMove(id);
+    // One convergence pass once the drag has settled, to catch anything the
+    // skipped passes would have corrected.
+    setGeomTick((t) => t + 1);
+  }, []);
 
   // ---- palette -> canvas, via pointer events (not native HTML5 drag) ----
   // Native HTML5 drag-and-drop on an element makes the browser treat any

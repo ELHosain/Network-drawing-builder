@@ -44,19 +44,43 @@ export function useMagnify({
   const containerRef = useRef(null);
   const frame = useRef(0);
   const pointer = useRef(null);
+  // Measured element centres, cached. See measure() below.
+  const cache = useRef(null);
+
+  // The centres are measured ONCE per pointer entry instead of every frame.
+  //
+  // This was the single most expensive thing in the app's hover path: a
+  // getBoundingClientRect per control per frame, which is a forced synchronous
+  // layout each time -- around eighteen of them per frame just to sweep the
+  // toolbar.
+  //
+  // It is safe to cache precisely because this magnifier scales about the
+  // centre: a centred scale leaves the centre point exactly where it was, so
+  // magnifying an element cannot move its own centre or anybody else's. The
+  // cache is dropped whenever something could genuinely move them -- the
+  // pointer leaving, a resize, or a scroll.
+  const measure = useCallback(() => {
+    const root = containerRef.current;
+    if (!root) { cache.current = null; return; }
+    cache.current = [...root.querySelectorAll(selector)].map((el) => {
+      const r = el.getBoundingClientRect();
+      return { el, centre: axis === 'x' ? r.left + r.width / 2 : r.top + r.height / 2 };
+    });
+  }, [axis, selector]);
 
   const paint = useCallback(() => {
     frame.current = 0;
-    const root = containerRef.current;
-    if (!root) return;
-
-    const items = root.querySelectorAll(selector);
     const p = pointer.current;
 
-    items.forEach((el) => {
-      if (p === null) { clear(el); return; }
-      const r = el.getBoundingClientRect();
-      const centre = axis === 'x' ? r.left + r.width / 2 : r.top + r.height / 2;
+    if (p === null) {
+      cache.current?.forEach(({ el }) => clear(el));
+      cache.current = null;
+      return;
+    }
+
+    if (!cache.current) measure();
+
+    (cache.current || []).forEach(({ el, centre }) => {
       const d = Math.abs(p - centre);
       const t = Math.min(1, d / distance);
       // Cosine falloff rather than linear: the ramp eases out near the edge of
@@ -72,7 +96,7 @@ export function useMagnify({
         clear(el);
       }
     });
-  }, [axis, max, distance, selector]);
+  }, [max, distance, measure]);
 
   const schedule = useCallback(() => {
     if (frame.current) return;
@@ -88,6 +112,19 @@ export function useMagnify({
     pointer.current = null;
     schedule();
   }, [schedule]);
+
+  // Anything that can actually move the controls invalidates the cache: the
+  // window resizing (the toolbar wraps), or the container scrolling.
+  useEffect(() => {
+    const drop = () => { cache.current = null; };
+    window.addEventListener('resize', drop);
+    const root = containerRef.current;
+    root?.addEventListener('scroll', drop, { passive: true });
+    return () => {
+      window.removeEventListener('resize', drop);
+      root?.removeEventListener('scroll', drop);
+    };
+  }, []);
 
   useEffect(() => () => { if (frame.current) cancelAnimationFrame(frame.current); }, []);
 

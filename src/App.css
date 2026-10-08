@@ -1768,7 +1768,7 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
    bob that catches the eye without spinning. A soft brand glow pools behind. */
 .gate-logo-wrap {
   position: relative;
-  width: 112px; height: 112px;
+  width: 140px; height: 140px;
   margin-bottom: 14px;
   display: flex; align-items: center; justify-content: center;
   perspective: 600px;
@@ -1776,7 +1776,7 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
 
 .gate-logo {
   position: relative; z-index: 2;
-  width: 104px; height: 104px;
+  width: 128px; height: 128px;
   /* Layered shadows read as the object standing off the surface: a tight
      contact shadow, a wide soft one, and a faint brand-coloured cast. */
   filter:

@@ -134,7 +134,11 @@ export default function ProfileGate({
 
       <div className="gate-inner">
         <div className="gate-head">
-          <img className="gate-logo" src="/logo-96.png" alt="" width="96" height="96" draggable={false} />
+          <span className="gate-logo-wrap" aria-hidden="true">
+            <span className="gate-logo-ring" />
+            <span className="gate-logo-glow" />
+            <img className="gate-logo" src="/logo-96.png" alt="" width="96" height="96" draggable={false} />
+          </span>
           <h1 className="gate-brand">Network Drawing Builder</h1>
           <p className="gate-sub">Industrial topology editor</p>
         </div>

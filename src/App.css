@@ -1762,17 +1762,53 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
   margin-bottom: 34px;
   animation: gateRise .5s var(--ease) both;
 }
+/* The logo gets a premium treatment: bigger, floating, with a slow brand
+   gradient ring orbiting it and a soft colour glow pooling behind. The ring
+   and glow sit in the wrapper so the float animation on the logo itself does
+   not drag them around with it. */
+.gate-logo-wrap {
+  position: relative;
+  width: 86px; height: 86px;
+  margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+
 .gate-logo {
-  width: 58px; height: 58px; border-radius: 16px; margin-bottom: 12px;
+  position: relative; z-index: 2;
+  width: 78px; height: 78px; border-radius: 20px;
   box-shadow:
-    0 10px 30px -8px rgba(0, 0, 0, .55),
-    0 0 0 1px var(--glass-edge),
-    0 0 40px -10px var(--accent);
+    0 14px 34px -10px rgba(0, 0, 0, .6),
+    inset 0 1px 0 rgba(255, 255, 255, .12);
   animation: gateLogo 5s ease-in-out infinite alternate;
 }
 @keyframes gateLogo {
-  from { transform: translateY(0) rotate(0deg); }
-  to   { transform: translateY(-5px) rotate(-1.5deg); }
+  from { transform: translateY(0); }
+  to   { transform: translateY(-6px); }
+}
+
+/* A conic brand-gradient ring, masked to a thin band, rotating slowly. */
+.gate-logo-ring {
+  position: absolute; inset: -4px; z-index: 1;
+  border-radius: 24px;
+  background: conic-gradient(from 0deg, var(--accent), #8b4db0, var(--accent), #8b4db0, var(--accent));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+  opacity: .85;
+  animation: gateLogoRing 7s linear infinite;
+}
+@keyframes gateLogoRing { to { transform: rotate(1turn); } }
+
+/* A soft pool of brand colour behind the whole thing. */
+.gate-logo-glow {
+  position: absolute; inset: -24px; z-index: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-ring), transparent 68%);
+  filter: blur(8px);
+  animation: gateLogoGlow 4s ease-in-out infinite alternate;
+}
+@keyframes gateLogoGlow {
+  from { opacity: .7; transform: scale(.92); }
+  to   { opacity: 1; transform: scale(1.08); }
 }
 
 .gate-brand {
@@ -2013,7 +2049,7 @@ footer #hint kbd { font-size: 9px; padding: 2px 5px; }
    floating logo, the sweeping heading. One-shot entrances are kept: they are
    brief, they end, and removing them left the screen feeling broken. */
 @media (prefers-reduced-motion: reduce) {
-  .gate-glow, .gate-logo, .gate-title { animation: none !important; }
+  .gate-glow, .gate-logo, .gate-logo-ring, .gate-logo-glow, .gate-title { animation: none !important; }
   .gate-sheen { display: none; }
 }
 
